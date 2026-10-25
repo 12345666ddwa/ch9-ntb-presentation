@@ -1,0 +1,1095 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>非关税壁垒的真实代价 · 第9章小组汇报</title>
+<style>
+:root{
+  --paper:#faf7f0; --paper2:#f3eee3; --ink:#1a1a1a; --ink2:#4a4a4a; --ink3:#7a7469;
+  --red:#960002; --red2:#b71c1c; --gold:#b8935a; --rule:rgba(26,26,26,.10);
+  --card:rgba(150,0,2,.028); --card2:#fffdf8;
+  --sans:"PingFang SC","Microsoft YaHei","Noto Sans SC","Hiragino Sans GB",-apple-system,sans-serif;
+  --serif:"Source Han Serif SC","Noto Serif SC","Songti SC",SimSun,Georgia,serif;
+  --mono:"SF Mono","JetBrains Mono",Consolas,monospace;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;background:#e8e3d8;overflow:hidden;font-family:var(--sans);color:var(--ink);
+  -webkit-font-smoothing:antialiased}
+
+#stage{position:fixed;inset:0;display:grid;place-items:center}
+#deck{position:relative;width:1280px;height:720px;background:var(--paper);overflow:hidden;
+  box-shadow:0 24px 80px rgba(0,0,0,.22);transform-origin:center center}
+
+/* ---------- slide base ---------- */
+.slide{position:absolute;inset:0;padding:52px 68px 62px;display:flex;flex-direction:column;
+  background:var(--paper);opacity:0;transform:translateX(46px);pointer-events:none;
+  transition:opacity .5s ease,transform .55s cubic-bezier(.25,.46,.45,.94)}
+.slide.active{opacity:1;transform:none;pointer-events:auto}
+.slide::before{content:"";position:absolute;inset:0;pointer-events:none;
+  background:
+    linear-gradient(90deg,transparent 0 67px,var(--rule) 67px 68px,transparent 68px),
+    linear-gradient(180deg,transparent 0 51px,var(--rule) 51px 52px,transparent 52px);
+  opacity:.55}
+.slide.dark{background:#161211;color:#f6f1e7}
+.slide.dark::before{background:
+    linear-gradient(90deg,transparent 0 67px,rgba(246,241,231,.12) 67px 68px,transparent 68px),
+    linear-gradient(180deg,transparent 0 51px,rgba(246,241,231,.12) 51px 52px,transparent 52px)}
+
+/* ---------- header / footer ---------- */
+.kicker{font-family:var(--mono);font-size:12.5px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--red);display:flex;align-items:center;gap:12px}
+.kicker .bar{width:28px;height:2px;background:var(--red);flex:none}
+.dark .kicker{color:var(--gold)}
+.dark .kicker .bar{background:var(--gold)}
+
+h1{font-family:var(--serif);font-size:40px;line-height:1.24;font-weight:700;letter-spacing:-.01em;margin-top:14px}
+h1 .hl{color:var(--red)}
+.big{font-family:var(--serif);font-size:56px;line-height:1.18;font-weight:700}
+.lead{font-size:17.5px;color:var(--ink2);line-height:1.68;margin-top:12px;max-width:1000px}
+.dark .lead{color:#cfc6b6}
+
+.foot{margin-top:auto;display:flex;justify-content:space-between;align-items:flex-end;
+  font-family:var(--mono);font-size:11.5px;color:var(--ink3);letter-spacing:.06em;
+  border-top:1px solid var(--rule);padding-top:9px}
+.dark .foot{color:#8d8478;border-color:rgba(246,241,231,.14)}
+.body{flex:1;display:flex;flex-direction:column;justify-content:center;min-height:0}
+
+/* ---------- reveal ---------- */
+.rv{opacity:0}
+.slide.active .rv{animation:fadeUp .72s cubic-bezier(.25,.46,.45,.94) var(--d,0s) forwards}
+@keyframes fadeUp{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:none}}
+@keyframes slideIn{from{opacity:0;transform:translateX(-26px)}to{opacity:1;transform:none}}
+
+/* ---------- grid helpers ---------- */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:26px}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.g5{display:grid;grid-template-columns:repeat(5,1fr);gap:14px}
+
+/* ---------- cards ---------- */
+.card{background:var(--card2);border:1px solid var(--rule);padding:20px 22px;position:relative}
+.card::after{content:"";position:absolute;left:0;top:0;width:34px;height:2px;background:var(--red)}
+.card h3{font-size:16px;font-weight:700;margin-bottom:9px;letter-spacing:.01em}
+.card p{font-size:14px;line-height:1.65;color:var(--ink2)}
+.card .tagx{font-family:var(--mono);font-size:11px;color:var(--gold);letter-spacing:.1em;display:block;margin-bottom:6px}
+.card.flat::after{display:none}
+.dark .card{background:rgba(246,241,231,.045);border-color:rgba(246,241,231,.12)}
+.dark .card p{color:#c3baa9}
+
+/* number blocks */
+.stat{padding:16px 18px;border-left:2px solid var(--red);background:var(--card)}
+.stat .num{font-family:var(--serif);font-size:38px;font-weight:700;line-height:1;color:var(--red)}
+.stat .lbl{font-size:13px;color:var(--ink2);margin-top:8px;line-height:1.5}
+.stat .note{font-size:11.5px;color:var(--ink3);margin-top:5px;line-height:1.5;font-family:var(--mono)}
+.dark .stat{border-left-color:var(--gold);background:rgba(246,241,231,.05)}
+.dark .stat .num{color:var(--gold)}
+.dark .stat .lbl{color:#c3baa9}
+
+/* ---------- tables ---------- */
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{font-family:var(--sans);font-weight:700;font-size:12.5px;text-align:left;padding:9px 10px;
+  border-bottom:1.5px solid var(--ink);letter-spacing:.02em}
+td{padding:8px 10px;border-bottom:1px solid var(--rule);line-height:1.5;color:var(--ink2);vertical-align:top}
+td.strong{color:var(--ink);font-weight:600}
+td.num{font-family:var(--mono);font-size:12.5px;white-space:nowrap}
+.sig{color:var(--red);font-family:var(--mono);font-size:11px}
+.dark th{border-color:#f6f1e7}
+.dark td{border-color:rgba(246,241,231,.12);color:#c3baa9}
+.dark td.strong{color:#f6f1e7}
+
+/* ---------- CSS bar chart ---------- */
+.bars{display:flex;flex-direction:column;gap:9px}
+.brow{display:grid;grid-template-columns:104px 1fr 68px;align-items:center;gap:12px;font-size:13.5px}
+.brow .lab{color:var(--ink2);text-align:right}
+.brow .track{height:19px;background:rgba(26,26,26,.055);position:relative;overflow:hidden}
+.brow .fill{height:100%;background:var(--red);animation:grow 1s cubic-bezier(.25,.46,.45,.94) both}
+.brow .fill.g{background:var(--gold)}
+.brow .fill.k{background:#3f3a33}
+.slide.active .brow .fill{animation-delay:var(--d,.2s)}
+@keyframes grow{from{width:0 !important}}
+.brow .val{font-family:var(--mono);font-size:12.5px;color:var(--ink)}
+
+/* grouped mini bars */
+.mini{display:flex;align-items:flex-end;gap:16px;height:118px}
+.mini .col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%}
+.mini .b{width:52px;background:var(--red);position:relative}
+.mini .b.g{background:var(--gold)}
+.mini .b.neg{background:#8d8478}
+.mini .v{font-family:var(--mono);font-size:11.5px;margin-bottom:5px;color:var(--ink)}
+.mini .x{font-size:11.5px;color:var(--ink3);margin-top:7px;text-align:center;line-height:1.3}
+.zero{height:1px;background:var(--ink);opacity:.32;margin:2px 0}
+
+/* chips */
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{font-family:var(--mono);font-size:11.5px;padding:5px 10px;border:1px solid var(--rule);
+  background:var(--card2);color:var(--ink2)}
+.chip b{color:var(--red)}
+
+/* matrix */
+.matrix{display:grid;grid-template-columns:130px 1fr 1fr;gap:1px;background:var(--rule);border:1px solid var(--rule)}
+.matrix>div{background:var(--card2);padding:13px 15px;font-size:13px;line-height:1.5}
+.matrix .hd{background:var(--paper2);font-weight:700;font-size:12.5px;color:var(--ink)}
+.matrix .rowh{background:var(--paper2);font-weight:600;font-size:12.5px}
+.matrix .cell .c{font-family:var(--mono);font-size:15px;font-weight:700;display:block;margin-bottom:3px}
+.matrix .hit{background:rgba(150,0,2,.07)}
+.matrix .hit .c{color:var(--red)}
+.matrix .miss .c{color:#a09889;font-weight:400}
+.matrix .miss{background:rgba(26,26,26,.028)}
+
+/* chain */
+.chain{display:flex;align-items:center;gap:0;margin-top:6px}
+.chain .node{flex:1;padding:14px 12px;background:var(--card2);border:1px solid var(--rule);
+  font-size:13px;text-align:center;line-height:1.45;position:relative}
+.chain .node b{display:block;font-size:14px;margin-bottom:4px}
+.chain .node small{font-family:var(--mono);font-size:11px;color:var(--red)}
+.chain .arrow{width:26px;text-align:center;color:var(--red);font-size:15px;flex:none}
+
+/* quote */
+.quote{font-family:var(--serif);font-size:26px;line-height:1.55;color:var(--ink);
+  border-left:3px solid var(--red);padding-left:24px}
+.quote em{color:var(--red);font-style:normal}
+
+/* route map */
+.route{display:flex;flex-direction:column;gap:0;width:100%}
+.rrow{display:grid;grid-template-columns:56px 1fr auto;align-items:center;gap:18px;
+  padding:17px 0;border-bottom:1px solid var(--rule)}
+.rrow:first-child{border-top:1px solid var(--rule)}
+.rrow .n{font-family:var(--serif);font-size:26px;font-weight:700;color:var(--red);line-height:1}
+.rrow .t{font-size:16px;font-weight:600}
+.rrow .t small{display:block;font-weight:400;font-size:13px;color:var(--ink3);margin-top:3px}
+.rrow .who{font-family:var(--mono);font-size:11.5px;color:var(--gold);letter-spacing:.08em}
+
+/* svg */
+svg{display:block;overflow:visible}
+.sv-lbl{font-family:var(--sans);font-size:11.5px;fill:#4a4a4a}
+.sv-num{font-family:var(--mono);font-size:11px;fill:#7a7469}
+.sv-area{font-family:var(--serif);font-size:15px;font-weight:700;fill:#960002}
+
+/* HUD */
+.hud{position:fixed;left:0;right:0;bottom:0;height:3px;background:rgba(26,26,26,.10);z-index:40}
+.hud .prog{height:100%;width:0;background:var(--red);transition:width .45s cubic-bezier(.25,.46,.45,.94)}
+.counter{position:fixed;right:20px;bottom:16px;font-family:var(--mono);font-size:12px;
+  color:#6b655b;letter-spacing:.1em;z-index:41;background:rgba(250,247,240,.86);padding:4px 9px}
+.hint{position:fixed;left:20px;bottom:16px;font-family:var(--mono);font-size:11px;color:#8b857a;z-index:41;
+  transition:opacity .6s ease}
+.hint.hide{opacity:0}
+</style>
+
+<!-- I18N-CSS-START -->
+<style>
+.langbar{position:fixed;top:14px;right:20px;display:flex;z-index:42;
+  border:1px solid rgba(26,26,26,.20);background:rgba(250,247,240,.94);
+  box-shadow:0 2px 10px rgba(0,0,0,.06)}
+.langbtn{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;padding:6px 14px;
+  border:0;background:transparent;color:#6b655b;cursor:pointer;transition:background .25s,color .25s}
+.langbtn+.langbtn{border-left:1px solid rgba(26,26,26,.20)}
+.langbtn.active{background:#960002;color:#faf7f0}
+.langbtn:hover:not(.active){background:rgba(150,0,2,.08);color:#960002}
+/* 英文版文字普遍更长，含 720px 画布；按需微收字号，避免溢出 */
+html[lang="en"] h1{font-size:36.5px}
+html[lang="en"] .big{font-size:50px}
+html[lang="en"] .lead{font-size:16.5px}
+html[lang="en"] .quote{font-size:23px}
+html[lang="en"] .card p{font-size:13.2px}
+html[lang="en"] td{font-size:12.2px}
+html[lang="en"] th{font-size:12px}
+html[lang="en"] .stat .num{font-size:34px}
+html[lang="en"] .kicker{font-size:11.5px}
+/* 矩阵页（P16）英文更长，单独收紧 */
+html[lang="en"] .matrix>div{padding:9px 13px;font-size:12.1px;line-height:1.45}
+html[lang="en"] .matrix .cell .c{font-size:14px;margin-bottom:2px}
+html[lang="en"] .matrix .rowh{font-size:11.8px}
+html[lang="en"] .matrix+h2,html[lang="en"] .matrix+.g2{margin-top:13px !important}
+html[lang="en"] .matrix+.g2 .card p{font-size:12.6px;line-height:1.6}
+</style>
+<!-- I18N-CSS-END -->
+</head>
+<body>
+<div id="stage">
+<div id="deck">
+
+<!-- ============ 01 封面 ============ -->
+<section class="slide dark active" data-part="COVER" data-spk="">
+  <div class="body" style="justify-content:center">
+    <div class="kicker rv" style="--d:.05s"><span class="bar"></span>Pugel · International Economics · 17th ed. · Chapter 9</div>
+    <h1 class="big rv" style="--d:.18s;margin-top:22px">非关税壁垒的<em style="font-style:normal;color:var(--gold)">真实代价</em></h1>
+    <div class="rv" style="--d:.32s;margin-top:16px;width:66px;height:3px;background:var(--gold)"></div>
+    <p class="lead rv" style="--d:.42s;font-size:22px;font-family:var(--serif);color:#e6ddcb">
+      从「一块三角形」到「一张网络的形变」
+    </p>
+    <p class="lead rv" style="--d:.54s;font-size:15px;margin-top:22px;max-width:760px">
+      教材第九章教你用无谓损失三角形衡量非关税壁垒；两篇 2026 年的实证论文告诉我们，
+      代价其实外溢到第三方市场、中间品成本与全球价值链的网络位置上。
+    </p>
+    <div class="rv" style="--d:.7s;margin-top:34px;display:flex;gap:34px;font-family:var(--mono);font-size:12px;color:#9a9183;letter-spacing:.05em">
+      <span>Cai &amp; Zhou (2026), <i>Econ. Anal. Policy</i> 94</span>
+      <span>乔小勇等 (2026)，《管理评论》38(8)</span>
+    </div>
+  </div>
+  <div class="foot"><span>小组汇报 · 四人分工 A / B / C / D</span><span>2026</span></div>
+</section>
+
+<!-- ============ 02 路线图 ============ -->
+<section class="slide" data-part="路线" data-spk="A">
+  <div class="kicker rv"><span class="bar"></span>Roadmap</div>
+  <h1 class="rv" style="--d:.1s">今天只回答四个问题</h1>
+  <div class="body" style="justify-content:center;margin-top:6px">
+    <div class="route">
+      <div class="rrow rv" style="--d:.2s"><div class="n">01</div>
+        <div class="t">关税退潮之后，保护跑到哪里去了？<small>教材第九章的框架：三条渠道、八类壁垒、一块三角形</small></div>
+        <div class="who">A · 4′</div></div>
+      <div class="rrow rv" style="--d:.3s"><div class="n">02</div>
+        <div class="t">一种新型壁垒如何起作用？<small>论文一：美国 337 调查（知识产权执行型壁垒）与出口转移</small></div>
+        <div class="who">B · 5′</div></div>
+      <div class="rrow rv" style="--d:.4s"><div class="n">03</div>
+        <div class="t">代价到底有多大？<small>论文二：50 类贸易限制性措施与全球价值链网络韧性</small></div>
+        <div class="who">C · 5′</div></div>
+      <div class="rrow rv" style="--d:.5s"><div class="n">04</div>
+        <div class="t">教材算漏了什么？<small>对照、批判与结论：五条「低估理由」逐条被实证</small></div>
+        <div class="who">D · 4′</div></div>
+    </div>
+  </div>
+  <div class="foot"><span>PART 0 · 路线图</span><span>02 / 23</span></div>
+</section>
+
+<!-- ============ 03 三条渠道 ============ -->
+<section class="slide" data-part="PART 1 · 教材第九章" data-spk="A">
+  <div class="kicker rv"><span class="bar"></span>Part 1 · Textbook Framework</div>
+  <h1 class="rv" style="--d:.1s">底座①：非关税壁垒只有<span class="hl">三条</span>作用路径</h1>
+  <p class="lead rv" style="--d:.18s">NTB = 关税以外、用于减少进口的一切政策（教材 p.161）。它不管长什么样，最终都通过下面三条渠道之一生效。</p>
+  <div class="body" style="justify-content:center">
+    <div class="g3" style="margin-top:4px">
+      <div class="card rv" style="--d:.26s">
+        <span class="tagx">CHANNEL 01</span>
+        <h3>把数量卡住</h3>
+        <p>进口配额 · 自愿出口限制 VER · 关税配额的禁止性高档 · 政府采购明令禁买</p>
+      </div>
+      <div class="card rv" style="--d:.34s">
+        <span class="tagx">CHANNEL 02</span>
+        <h3>把成本抬高</h3>
+        <p>产品标准与认证 · 国产化率与混合要求 · 进口押金 · 海关归类与估价程序</p>
+      </div>
+      <div class="card rv" style="--d:.42s">
+        <span class="tagx">CHANNEL 03</span>
+        <h3>把不确定性做大</h3>
+        <p>进口许可审批时限不明 · 标准执行尺度模糊 · 立案与调查本身改变预期</p>
+      </div>
+    </div>
+    <div class="card flat rv" style="--d:.54s;margin-top:22px;background:rgba(150,0,2,.05);border-left:3px solid var(--red)">
+      <p style="font-size:14.5px;color:var(--ink)">
+        <b>记住第三条渠道</b>：教材图 9.1 的右列里，只有「技术与产品标准 / 进口许可 / 海关程序」这三类会制造不确定性。
+        等下讲论文一会回来用它——<span style="color:var(--red)">337 调查最厉害的杀伤力，恰恰不在数量，而在这一条。</span>
+      </p>
+    </div>
+  </div>
+  <div class="foot"><span>教材 pp.161–163 · 图 9.1</span><span>03 / 23</span></div>
+</section>
+
+<!-- ============ 04 等值关税 ============ -->
+<section class="slide" data-part="PART 1 · 教材第九章" data-spk="A">
+  <div class="kicker rv"><span class="bar"></span>Part 1 · Textbook Framework</div>
+  <h1 class="rv" style="--d:.1s">底座②：把非关税壁垒<span class="hl">折算成关税</span>，它比关税更重</h1>
+  <div class="body" style="justify-content:center">
+    <div class="g2" style="align-items:center;gap:40px">
+      <div class="rv" style="--d:.2s">
+        <div class="bars">
+          <div class="brow"><div class="lab">墨西哥</div><div class="track"><div class="fill" style="width:100%;--d:.28s"></div></div><div class="val">13.9%</div></div>
+          <div class="brow"><div class="lab">欧盟</div><div class="track"><div class="fill" style="width:69%;--d:.36s"></div></div><div class="val">9.6%</div></div>
+          <div class="brow"><div class="lab">日本</div><div class="track"><div class="fill" style="width:61%;--d:.44s"></div></div><div class="val">8.5%</div></div>
+          <div class="brow"><div class="lab">中国</div><div class="track"><div class="fill" style="width:46%;--d:.52s"></div></div><div class="val">6.4%</div></div>
+          <div class="brow"><div class="lab">美国</div><div class="track"><div class="fill" style="width:40%;--d:.6s"></div></div><div class="val">5.5%</div></div>
+          <div class="brow"><div class="lab">加拿大</div><div class="track"><div class="fill" style="width:22%;--d:.68s"></div></div><div class="val">3.0%</div></div>
+        </div>
+        <p style="font-family:var(--mono);font-size:11px;color:var(--ink3);margin-top:14px">
+          数据：Kee et al. (2009)，教材 p.162–163。等值关税 = 能造成同等进口量减少的关税税率。
+        </p>
+      </div>
+      <div class="rv" style="--d:.3s">
+        <div class="card flat" style="border-left:3px solid var(--red);background:rgba(150,0,2,.045);padding:24px 26px">
+          <p style="font-size:16px;line-height:1.75;color:var(--ink)">
+            教材的结论很直接：<b>就限制世界贸易而言，非关税壁垒比关税更重要。</b>
+          </p>
+          <p style="font-size:14.5px;line-height:1.75;color:var(--ink2);margin-top:14px">
+            道理也不难：关税谈了七十年，从 40% 谈到个位数；而壁垒换个形式就能绕开谈判桌——
+            这正是本章存在的理由。
+          </p>
+        </div>
+        <div class="stat rv" style="--d:.5s;margin-top:18px">
+          <div class="num">5.5%–13.9%</div>
+          <div class="lbl">六个主要经济体的 NTB 等值关税区间</div>
+          <div class="note">对发展中国家而言，这个数值通常更高</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><span>教材 pp.162–163 · Kee et al. (2009)</span><span>04 / 23</span></div>
+</section>
+
+<!-- ============ 05 配额三角形 ============ -->
+<section class="slide" data-part="PART 1 · 教材第九章" data-spk="A">
+  <div class="kicker rv"><span class="bar"></span>Part 1 · Textbook Framework</div>
+  <h1 class="rv" style="--d:.1s">底座③：一块三角形，算出保护的账</h1>
+  <div class="body">
+    <div class="g2" style="gap:36px;align-items:center;margin-top:2px">
+      <div class="rv" style="--d:.2s">
+        <svg viewBox="0 0 560 330" width="100%" height="286">
+          <!-- grid -->
+          <line x1="60" y1="40" x2="60" y2="300" stroke="#1a1a1a" stroke-width="1.4"/>
+          <line x1="60" y1="300" x2="530" y2="300" stroke="#1a1a1a" stroke-width="1.4"/>
+          <!-- areas -->
+          <polygon points="60,105 60,170 213.3,170 264.4,105" fill="rgba(184,147,90,.30)"/>
+          <polygon points="213.3,170 264.4,105 264.4,170" fill="rgba(150,0,2,.16)"/>
+          <rect x="264.4" y="105" width="153.4" height="65" fill="rgba(150,0,2,.28)"/>
+          <polygon points="417.8,105 468.9,170 417.8,170" fill="rgba(150,0,2,.16)"/>
+          <!-- price lines -->
+          <line x1="60" y1="170" x2="530" y2="170" stroke="#7a7469" stroke-width="1.1" stroke-dasharray="5 4"/>
+          <line x1="60" y1="105" x2="530" y2="105" stroke="#960002" stroke-width="1.4" stroke-dasharray="6 4"/>
+          <!-- curves -->
+          <line x1="111.1" y1="300" x2="315.6" y2="40" stroke="#1a1a1a" stroke-width="2"/>
+          <line x1="366.7" y1="40" x2="522" y2="236" stroke="#1a1a1a" stroke-width="2"/>
+          <line x1="264.4" y1="300" x2="468.9" y2="40" stroke="#b8935a" stroke-width="1.8" stroke-dasharray="7 5"/>
+          <!-- area labels -->
+          <text class="sv-area" x="150" y="145">a</text>
+          <text class="sv-area" x="243" y="160">b</text>
+          <text class="sv-area" x="336" y="145">c</text>
+          <text class="sv-area" x="424" y="160">d</text>
+          <!-- curve labels -->
+          <text class="sv-lbl" x="322" y="56">Dd</text>
+          <text class="sv-lbl" x="300" y="292">Sd</text>
+          <text class="sv-lbl" x="452" y="70" fill="#b8935a">Sd + QQ</text>
+          <!-- axis ticks -->
+          <text class="sv-num" x="198" y="316">0.6</text>
+          <text class="sv-num" x="250" y="316">0.8</text>
+          <text class="sv-num" x="404" y="316">1.4</text>
+          <text class="sv-num" x="455" y="316">1.6</text>
+          <text class="sv-num" x="30" y="174">300</text>
+          <text class="sv-num" x="30" y="109">330</text>
+          <text class="sv-lbl" x="270" y="330" style="font-size:11px">进口量（百万辆／年）</text>
+        </svg>
+      </div>
+      <div class="rv" style="--d:.34s">
+        <p style="font-size:14px;color:var(--ink2);line-height:1.7;margin-bottom:14px">
+          世界价 300 美元，自由贸易进口 100 万辆；配额压到 <b>60 万辆</b>，国内价涨到 <b>330 美元</b>。
+        </p>
+        <table style="font-size:12.5px">
+          <tr><td class="strong">a</td><td>生产者剩余增加</td><td class="num" style="color:var(--gold)">归生产者</td></tr>
+          <tr><td class="strong">b</td><td>生产扭曲：本国造 20 万辆，成本最高到 330</td><td class="num">净损失</td></tr>
+          <tr><td class="strong">c</td><td>进口加价：30 美元 × 60 万辆</td><td class="num" style="color:var(--red)">归谁？</td></tr>
+          <tr><td class="strong">d</td><td>消费扭曲：消费从 160 万降到 140 万</td><td class="num">净损失</td></tr>
+        </table>
+        <div class="card flat rv" style="--d:.5s;margin-top:16px;background:rgba(150,0,2,.05);border-left:3px solid var(--red)">
+          <p style="font-size:13.5px;line-height:1.7;color:var(--ink)">
+            配额与等量关税<b>唯一的差别就是 c 归谁</b>：拍卖给政府、固定偏袒给进口商、靠排队游说去抢就变成社会浪费——
+            <span style="color:var(--red)">最后一种情况下，配额比关税更糟。</span>
+          </p>
+        </div>
+      </div>
+    </div>
+    <div class="g3 rv" style="--d:.62s;margin-top:16px">
+      <div class="stat"><div class="num">½×10%×20%×20%</div><div class="lbl">全部关税的净损失公式代入</div></div>
+      <div class="stat"><div class="num">0.2%</div><div class="lbl">占 GDP 比重——看起来很小</div></div>
+      <div class="stat"><div class="num">≈ $40bn</div><div class="lbl">但绝对值相当于 400 亿美元</div></div>
+    </div>
+  </div>
+  <div class="foot"><span>教材 pp.163–165、182–184 · 图 9.2</span><span>05 / 23</span></div>
+</section>
+
+<!-- ============ 06 两个缺口 ============ -->
+<section class="slide" data-part="PART 1 · 教材第九章" data-spk="A">
+  <div class="kicker rv"><span class="bar"></span>Part 1 · 转折</div>
+  <h1 class="rv" style="--d:.1s">但教材自己留了<span class="hl">两个口子</span></h1>
+  <p class="lead rv" style="--d:.18s">这正是今天两篇论文的入口——我们不是跑题，是去补课。</p>
+  <div class="body" style="justify-content:center">
+    <div class="g2" style="margin-top:6px">
+      <div class="card rv" style="--d:.26s">
+        <span class="tagx">GAP 01 · pp.182–184</span>
+        <h3>只做局部均衡的静态福利</h3>
+        <p>只算本国市场里那一块 b+d。至于外国报复、执法成本、寻租、租金流向外国、创新与品种减少，
+        教材列了五条，然后说：<b>「真实成本可能明显更高，但很难说高出多少。」</b></p>
+        <p style="margin-top:10px;color:var(--red);font-weight:600">→ 论文二来接这句话：把「很难说」量化成可观测的网络指标。</p>
+      </div>
+      <div class="card rv" style="--d:.36s">
+        <span class="tagx">GAP 02 · pp.161–192</span>
+        <h3>壁垒清单与案例都已过时</h3>
+        <p>图 9.1 的八类壁垒里没有「知识产权执行」；争端部分讲了 301 条款，却没讲 337 调查；
+        最新的案例停在 2018 年的钢铁 VER。</p>
+        <p style="margin-top:10px;color:var(--red);font-weight:600">→ 论文一来补这一块：2014–2023 年的 337 调查。</p>
+      </div>
+    </div>
+    <div class="quote rv" style="--d:.52s;margin-top:34px;max-width:1050px">
+      教材算的是<em>一块面积</em>，两篇论文算的是<em>一张网的形变</em>。
+    </div>
+  </div>
+  <div class="foot"><span>PART 1 END · 交接给 B</span><span>06 / 23</span></div>
+</section>
+
+<!-- ============ 07 337 背景 ============ -->
+<section class="slide" data-part="PART 2 · 论文一" data-spk="B">
+  <div class="kicker rv"><span class="bar"></span>Part 2 · Paper 1</div>
+  <h1 class="rv" style="--d:.1s">论文一：把「知识产权执行」当成一种贸易壁垒</h1>
+  <p class="lead rv" style="--d:.16s">
+    Cai &amp; Zhou (2026), <i>Economic Analysis and Policy</i> 94: 352–369　|　美国 <b>337 调查</b>（USITC 受理）与中国行业层面的出口转移
+  </p>
+  <div class="body" style="justify-content:center">
+    <div class="g3">
+      <div class="stat rv" style="--d:.24s"><div class="num">430</div><div class="lbl">2014–2023 年立案总数</div><div class="note">USITC / EDIS 官方记录</div></div>
+      <div class="stat rv" style="--d:.32s"><div class="num">177</div><div class="lbl">被告来自中国大陆的案件数，占 41.2%</div><div class="note">2019 年峰值 26 起</div></div>
+      <div class="stat rv" style="--d:.40s"><div class="num">59.4%</div><div class="lbl">2023 年涉华案件占比（最高年份）</div><div class="note">集中于通信设备 / 半导体 / 计算机</div></div>
+    </div>
+    <div class="card flat rv" style="--d:.52s;margin-top:24px;background:rgba(150,0,2,.045);border-left:3px solid var(--red)">
+      <p style="font-size:14.5px;line-height:1.75;color:var(--ink)">
+        <b>337 是什么：</b>由美国国际贸易委员会审理，针对进口贸易中的不公平做法，最主要的基础是<span style="color:var(--red)">专利侵权</span>。
+        与普通专利诉讼不同——它可以下<b>排除令（exclusion order）</b>或停止令，直接限制涉案产品在美国的进口与销售。
+        <br><span style="font-size:13px;color:var(--ink2)">教材 p.184 讲的 301 条款是它的同族：都是美国国内程序、都绕开 WTO 争端解决。</span>
+      </p>
+    </div>
+  </div>
+  <div class="foot"><span>教材 p.184–185（301 与 WTO 争端解决）→ 本文的 337</span><span>07 / 23</span></div>
+</section>
+
+<!-- ============ 08 三渠道 ============ -->
+<section class="slide" data-part="PART 2 · 论文一" data-spk="B">
+  <div class="kicker rv"><span class="bar"></span>Part 2 · Paper 1</div>
+  <h1 class="rv" style="--d:.1s">它其实是<span class="hl">三条渠道同时发力</span>，而论文抓的是第三条</h1>
+  <p class="lead rv" style="--d:.16s">用教材图 9.1 的框架去拆 337，三列立刻对齐。</p>
+  <div class="body" style="justify-content:center">
+    <div class="g3" style="margin-top:4px">
+      <div class="card rv" style="--d:.24s">
+        <span class="tagx">QUANTITY</span><h3>数量渠道</h3>
+        <p>排除令、停止令直接禁止进口与销售。一旦落地，进口量被硬切。</p>
+      </div>
+      <div class="card rv" style="--d:.32s">
+        <span class="tagx">COST</span><h3>成本渠道</h3>
+        <p>律师费、合规调整、下游客户的采购风险评估——都是真实支出。</p>
+      </div>
+      <div class="card rv" style="--d:.40s">
+        <span class="tagx">UNCERTAINTY</span><h3>不确定性渠道　←　论文真正识别的</h3>
+        <p>立案本身就会改变对美市场准入的预期。<b>很多案件最终并没有下排除令，订单却已经走了。</b></p>
+      </div>
+    </div>
+    <div class="quote rv" style="--d:.56s;margin-top:36px;max-width:1080px;font-size:23px">
+      这一页的意义：教材图 9.1 里那个「不确定性」列，<em>不是修辞，是一条文独立起作用的渠道</em>——现在有了实证。
+    </div>
+  </div>
+  <div class="foot"><span>教材 p.161–162 · 图 9.1 右列</span><span>08 / 23</span></div>
+</section>
+
+<!-- ============ 09 数据与识别 ============ -->
+<section class="slide" data-part="PART 2 · 论文一" data-spk="B">
+  <div class="kicker rv"><span class="bar"></span>Part 2 · Paper 1</div>
+  <h1 class="rv" style="--d:.1s">数据与识别：<span class="hl">强度 DID</span> + <span class="hl">双边际分解</span></h1>
+  <div class="body" style="justify-content:center">
+    <div class="g2" style="gap:34px">
+      <div class="rv" style="--d:.2s">
+        <div class="card flat" style="background:var(--card);border-left:3px solid var(--red);padding:20px 22px">
+          <p style="font-family:var(--mono);font-size:13.5px;line-height:1.9;color:var(--ink)">
+            DID<sub>ht</sub> = Post<sub>ht</sub> × Exposure<sub>h</sub>
+          </p>
+          <p style="font-size:13px;line-height:1.65;color:var(--ink2);margin-top:10px">
+            <b>Post</b>：该行业进入首案之后的年份＝1<br>
+            <b>Exposure</b>：首案<b>前一年</b>、涉案 HS6 产品占该行业对美出口的比重（样本期内固定）
+          </p>
+        </div>
+        <div class="card flat" style="margin-top:14px;padding:18px 22px">
+          <p style="font-size:13px;line-height:1.7;color:var(--ink2)">
+            <b>EM 广延边际</b>＝中国出口的 HS6 品种，覆盖了目的地该行业进口需求的多大比例<br>
+            <b>IM 集约边际</b>＝在中国已进入的那些产品上，中国占该国进口的比重
+          </p>
+        </div>
+      </div>
+      <div class="rv" style="--d:.34s">
+        <table style="font-size:12.5px">
+          <tr><th style="width:34%">项目</th><th>设定</th></tr>
+          <tr><td class="strong">观测单位</td><td>非美目的地国 × HS2 行业 × 年</td></tr>
+          <tr><td class="strong">样本</td><td>2014–2023；只保留 HS 第 28–96 章（剔除农产品与资源品）</td></tr>
+          <tr><td class="strong">观测数</td><td class="num">93,190</td></tr>
+          <tr><td class="strong">标准误</td><td>目的地国家层面聚类</td></tr>
+          <tr><td class="strong">数据源</td><td>CEPII-BACI｜WITS 关税｜USITC EDIS｜World Bank｜CEPII 引力变量｜Heritage</td></tr>
+          <tr><td class="strong">控制变量</td><td>双边 GDP、加权距离、RTA、共同语言 / 宗教 / 法系、经济自由度限制</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><span>论文一 §4 · 研究设计</span><span>09 / 23</span></div>
+</section>
+
+<!-- ============ 10 主结果 ============ -->
+<section class="slide" data-part="PART 2 · 论文一" data-spk="B">
+  <div class="kicker rv"><span class="bar"></span>Part 2 · Paper 1</div>
+  <h1 class="rv" style="--d:.1s">主结果：<span class="hl">两条腿都在走</span>——品种变宽，份额也变高</h1>
+  <div class="body" style="justify-content:center">
+    <div class="g2" style="gap:40px;align-items:center">
+      <div class="rv" style="--d:.2s">
+        <div class="g2" style="gap:16px">
+          <div class="stat" style="border-left-width:3px">
+            <div class="num">0.276<span class="sig">***</span></div>
+            <div class="lbl">广延边际 EM</div>
+            <div class="note">产品种类覆盖更宽</div>
+          </div>
+          <div class="stat" style="border-left-width:3px">
+            <div class="num">0.129<span class="sig">***</span></div>
+            <div class="lbl">集约边际 IM</div>
+            <div class="note">已有产品份额更高</div>
+          </div>
+        </div>
+        <p style="font-size:12.5px;color:var(--ink3);margin-top:12px;font-family:var(--mono)">
+          含控制变量；*** p&lt;0.01。无控制变量时为 0.326 / 0.106。
+        </p>
+      </div>
+      <div class="rv" style="--d:.34s">
+        <p style="font-size:13px;color:var(--ink2);margin-bottom:10px;font-weight:600">八道稳健性检验，方向全部不变</p>
+        <div class="chips">
+          <span class="chip">平行趋势 事前≈0</span>
+          <span class="chip">安慰剂 500 次抽样</span>
+          <span class="chip">换金额 <b>4.645***</b></span>
+          <span class="chip">换数量 <b>4.521***</b></span>
+          <span class="chip">剔极端国 0.304 / 0.129</span>
+          <span class="chip">剔 2020 后 0.219 / 0.156</span>
+          <span class="chip">PSM-DID 0.230 / 0.133</span>
+          <span class="chip">双向 FE 0.038 / 0.031</span>
+        </div>
+      </div>
+    </div>
+    <div class="quote rv" style="--d:.56s;margin-top:36px;max-width:1100px;font-size:21px">
+      337 调查<b>没有消灭</b>中国相关行业的出口，而是把它<em>推到了别处</em>——这就是「贸易转移」。
+    </div>
+  </div>
+  <div class="foot"><span>论文一 §5.1、§5.4 · 表 3、表 4</span><span>10 / 23</span></div>
+</section>
+
+<!-- ============ 11 机制 ============ -->
+<section class="slide" data-part="PART 2 · 论文一" data-spk="B">
+  <div class="kicker rv"><span class="bar"></span>Part 2 · Paper 1</div>
+  <h1 class="rv" style="--d:.1s">转移不是乱转：<span class="hl">三个机制</span>同时成立</h1>
+  <div class="body" style="justify-content:center">
+    <div class="bars" style="max-width:840px">
+      <div class="brow" style="grid-template-columns:210px 1fr 90px"><div class="lab" style="text-align:left">需求匹配（去进口需求大的市场）</div>
+        <div class="track"><div class="fill" style="width:100%;--d:.25s"></div></div><div class="val">0.360***</div></div>
+      <div class="brow" style="grid-template-columns:210px 1fr 90px"><div class="lab" style="text-align:left">既有贸易关系（复用渠道）</div>
+        <div class="track"><div class="fill g" style="width:94%;--d:.35s"></div></div><div class="val">0.338***</div></div>
+      <div class="brow" style="grid-template-columns:210px 1fr 90px"><div class="lab" style="text-align:left">转向低关税市场</div>
+        <div class="track"><div class="fill k" style="width:90%;--d:.45s"></div></div><div class="val">0.324***</div></div>
+    </div>
+    <div class="g3 rv" style="--d:.58s;margin-top:34px">
+      <div class="card flat"><p style="font-size:13px;line-height:1.65;color:var(--ink2)"><b>短期的做法：</b>先靠已经建好的渠道吸收，而不是从零开新市场——新市场要沉没成本。</p></div>
+      <div class="card flat"><p style="font-size:13px;line-height:1.65;color:var(--ink2)"><b>去哪里的做法：</b>挑关税低的地方去，降低切换成本。</p></div>
+      <div class="card flat"><p style="font-size:13px;line-height:1.65;color:var(--ink2)"><b>谁接得住：</b>进口需求越大的市场越能吸收——转移是被需求拉着走的。</p></div>
+    </div>
+    <p class="rv" style="--d:.7s;font-size:12.5px;color:var(--ink3);margin-top:20px">
+      【提醒】作者自己写明：机制检验是把中间结果当因变量回归，不是正式的中介分解——只能说「与这些渠道一致」。这一条我们在最后一节批判时会用到。
+    </p>
+  </div>
+  <div class="foot"><span>论文一 §5.5 · 表 5</span><span>11 / 23</span></div>
+</section>
+
+<!-- ============ 12 异质性 ============ -->
+<section class="slide" data-part="PART 2 · 论文一" data-spk="B">
+  <div class="kicker rv"><span class="bar"></span>Part 2 · Paper 1</div>
+  <h1 class="rv" style="--d:.1s">谁转移得更多：<span class="hl">四组异质性</span></h1>
+  <div class="body" style="justify-content:center">
+    <div class="g2" style="gap:30px">
+      <div class="rv" style="--d:.2s">
+        <p style="font-size:13px;font-weight:600;margin-bottom:12px">按目的地收入水平（EM）</p>
+        <div class="mini">
+          <div class="col"><div class="v">0.307</div><div class="b" style="height:78%"></div><div class="x">高收入</div></div>
+          <div class="col"><div class="v">0.286</div><div class="b" style="height:73%"></div><div class="x">中上</div></div>
+          <div class="col"><div class="v">0.253</div><div class="b" style="height:64%"></div><div class="x">中下</div></div>
+          <div class="col"><div class="v">0.196</div><div class="b" style="height:50%"></div><div class="x">低收入</div></div>
+        </div>
+        <p style="font-size:12px;color:var(--ink3);margin-top:10px;line-height:1.55">
+          集约边际在低收入国为 <b style="color:var(--red)">−0.092***</b>：低收入市场只承接了更多品种，没承接份额。
+        </p>
+      </div>
+      <div class="rv" style="--d:.32s">
+        <p style="font-size:13px;font-weight:600;margin-bottom:12px">按产品属性</p>
+        <div class="mini">
+          <div class="col"><div class="v">0.348</div><div class="b" style="height:88%"></div><div class="x">高技术<br>EM</div></div>
+          <div class="col"><div class="v">0.106</div><div class="b g" style="height:27%"></div><div class="x">高技术<br>IM</div></div>
+          <div class="col"><div class="v">0.239</div><div class="b" style="height:60%"></div><div class="x">非高技<br>EM</div></div>
+          <div class="col"><div class="v">0.244</div><div class="b g" style="height:62%"></div><div class="x">非高技<br>IM</div></div>
+        </div>
+        <p style="font-size:12px;color:var(--ink3);margin-top:10px;line-height:1.55">
+          高技术品靠<b>铺品种</b>（要重做认证与专利安排）；中低技术品标准化，靠<b>提份额</b>。
+        </p>
+      </div>
+    </div>
+    <div class="card flat rv" style="--d:.48s;margin-top:22px;background:rgba(150,0,2,.045);border-left:3px solid var(--red)">
+      <p style="font-size:13.5px;line-height:1.7;color:var(--ink)">
+        <b>最反直觉的一组：</b>非差异化产品 EM 高达 <b>0.731</b> 但 IM 为 <b style="color:var(--red)">−0.148</b>；
+        差异化产品 EM 只有 0.110，IM 却是 +0.102。
+        <span style="color:var(--ink2)">解释：标准化商品谁都能替代，只能靠「多上几个品种」去占位，价格战下守不住份额；
+        差异化商品靠品牌与客户黏性，反而能在既有市场里越做越深。</span>
+      </p>
+    </div>
+  </div>
+  <div class="foot"><span>论文一 §5.6 · 表 6–9</span><span>12 / 23</span></div>
+</section>
+
+<!-- ============ 13 论文二 问题与创新 ============ -->
+<section class="slide" data-part="PART 3 · 论文二" data-spk="C">
+  <div class="kicker rv"><span class="bar"></span>Part 3 · Paper 2</div>
+  <h1 class="rv" style="--d:.1s">论文二：不看出口去哪，<span class="hl">看网络位置还剩多少</span></h1>
+  <p class="lead rv" style="--d:.16s">乔小勇、郑闽荟、侯婷彧（2026），《管理评论》38(8)　|　贸易限制性政策与全球价值链网络韧性</p>
+  <div class="body" style="justify-content:center">
+    <div class="g3">
+      <div class="card rv" style="--d:.24s">
+        <span class="tagx">创新 01</span><h3>不研究单一壁垒</h3>
+        <p>把 GTA 数据库里 <b>50 类</b>贸易限制性措施打包成一个强度指标。理由：现实是多种措施同时砸下来，只看一种会低估。</p>
+      </div>
+      <div class="card rv" style="--d:.32s">
+        <span class="tagx">创新 02</span><h3>区分内资与外资</h3>
+        <p>在价值链里，跨国公司不是「又一个企业」。内资和外资受到的政策冲击完全不同，必须分开看。</p>
+      </div>
+      <div class="card rv" style="--d:.40s">
+        <span class="tagx">创新 03</span><h3>用 PageRank 定义网络韧性</h3>
+        <p>先算各国各行业节点在网络中的中心度，再算<b>该节点的变化率相对于全网变化率</b>——测的是「冲击下网络地位的相对稳定性」。</p>
+      </div>
+    </div>
+    <div class="card flat rv" style="--d:.54s;margin-top:22px">
+      <p style="font-size:13.5px;line-height:1.7;color:var(--ink2)">
+        <b>为什么只看「抵抗力」这一个维度？</b>作者的理由是：韧性包含抵抗力、恢复力、发展力，但恢复力与发展力都是<b>事后调整</b>，
+        救不了初始损失。所以本文只测「冲击当期，这个节点能不能守住位置」。基期取 2005–2007 年（金融危机前、格局最稳）。
+      </p>
+    </div>
+  </div>
+  <div class="foot"><span>论文二 · 引言与指标测度</span><span>13 / 23</span></div>
+</section>
+
+<!-- ============ 14 数据与识别 ============ -->
+<section class="slide" data-part="PART 3 · 论文二" data-spk="C">
+  <div class="kicker rv"><span class="bar"></span>Part 3 · Paper 2</div>
+  <h1 class="rv" style="--d:.1s">数据与识别：<span class="hl">两套数据库</span>拼成一张面板</h1>
+  <div class="body" style="justify-content:center">
+    <div class="g2" style="gap:34px">
+      <div class="rv" style="--d:.2s">
+        <table style="font-size:12.5px">
+          <tr><th style="width:38%">项目</th><th>设定</th></tr>
+          <tr><td class="strong">网络底表</td><td>OECD-AMNE 投入产出表：58 国 × 34 行业，区分内外资</td></tr>
+          <tr><td class="strong">政策底表</td><td>GTA 全球贸易预警库：50 类措施，取「红色」肯定性限制措施</td></tr>
+          <tr><td class="strong">匹配链条</td><td>HS6 → CPC2 → ISIC Rev.4 → OECD-AMNE</td></tr>
+          <tr><td class="strong">样本</td><td>2009–2016 年，<span class="num">18,054</span> 个观测</td></tr>
+          <tr><td class="strong">固定效应</td><td>时间 + 国家 + 行业（三重）</td></tr>
+          <tr><td class="strong">内生性</td><td>工具变量：措施种类总数、行业产出价格指数；辅以 PSM</td></tr>
+        </table>
+      </div>
+      <div class="rv" style="--d:.34s">
+        <div class="chain" style="flex-direction:column;gap:10px">
+          <div class="node" style="width:100%"><b>GTA：政策强度</b><small>TRP = 该国该行业当年被限制措施命中的频次</small></div>
+          <div class="arrow" style="width:100%">↓</div>
+          <div class="node" style="width:100%"><b>OECD-AMNE：网络位置</b><small>PageRank 中心度（阻尼因子 0.85）</small></div>
+          <div class="arrow" style="width:100%">↓</div>
+          <div class="node" style="width:100%"><b>韧性 = 节点变化率 / 全网变化率</b><small>分母取绝对值；基期 2005–2007</small></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><span>论文二 · 模型构建与数据处理</span><span>14 / 23</span></div>
+</section>
+
+<!-- ============ 15 主结果 ============ -->
+<section class="slide" data-part="PART 3 · 论文二" data-spk="C">
+  <div class="kicker rv"><span class="bar"></span>Part 3 · Paper 2</div>
+  <h1 class="rv" style="--d:.1s">主结果：<span class="hl">外资企业比内资脆弱约 5 倍</span></h1>
+  <div class="body" style="justify-content:center">
+    <div class="g2" style="gap:44px;align-items:center">
+      <div class="rv" style="--d:.2s">
+        <div class="mini" style="height:190px;gap:52px">
+          <div class="col"><div class="v" style="font-size:14px">−0.2930***</div><div class="b" style="height:100%;width:76px"></div><div class="x" style="font-size:12.5px">外资企业<br>F_Resilience</div></div>
+          <div class="col"><div class="v" style="font-size:14px">−0.0568***</div><div class="b g" style="height:19%;width:76px"></div><div class="x" style="font-size:12.5px">内资企业<br>D_Resilience</div></div>
+        </div>
+        <p style="font-family:var(--mono);font-size:11.5px;color:var(--ink3);margin-top:12px">t 值分别为 −5.05 与 −3.86，均在 1% 水平显著</p>
+      </div>
+      <div class="rv" style="--d:.36s">
+        <div class="card flat" style="border-left:3px solid var(--red);background:rgba(150,0,2,.045);padding:22px 24px">
+          <p style="font-size:14px;line-height:1.75;color:var(--ink)">
+            作者的解释：外资企业跨国运营、依赖全球供应链、还要看东道国政策脸色；
+            <b>内资企业有本土供应链与产业集群作缓冲</b>，所以冲击被部分吸收。
+          </p>
+        </div>
+        <div class="chips" style="margin-top:16px">
+          <span class="chip">IV 2SLS：<b>−0.4703 / −0.0697</b></span>
+          <span class="chip">PSM：<b>−0.2322 / −0.0681</b></span>
+          <span class="chip">换加权/换指标/加FE 全部显著为负</span>
+        </div>
+      </div>
+    </div>
+    <div class="quote rv" style="--d:.56s;margin-top:32px;max-width:1100px;font-size:21px">
+      论文一说的是<em>出口换了个地方</em>；论文二说的是<em>你在网络里的位置往下掉</em>。后者才是国家的账。
+    </div>
+  </div>
+  <div class="foot"><span>论文二 · 表 1–表 4</span><span>15 / 23</span></div>
+</section>
+
+<!-- ============ 16 类型拆解 ★ ============ -->
+<section class="slide" data-part="PART 3 · 论文二" data-spk="C">
+  <div class="kicker rv"><span class="bar"></span>Part 3 · Paper 2 · 全场最有信息量的一页</div>
+  <h1 class="rv" style="--d:.1s">把措施拆开：<span class="hl">谁打内资、谁打外资，分得很清楚</span></h1>
+  <div class="body" style="justify-content:center">
+    <div class="matrix rv" style="--d:.2s">
+      <div class="hd">措施类型</div><div class="hd">对外资企业</div><div class="hd">对内资企业</div>
+
+      <div class="rowh">直接壁垒<br><span style="font-weight:400;font-size:11px;color:var(--ink3)">关税、配额、数量限制</span></div>
+      <div class="cell miss"><span class="c">0.0012</span>不显著</div>
+      <div class="cell hit"><span class="c">−0.0004*</span>显著为负　打的是出口方</div>
+
+      <div class="rowh">政府补贴<br><span style="font-weight:400;font-size:11px;color:var(--ink3)">对本国企业补贴</span></div>
+      <div class="cell hit"><span class="c">−0.0119***</span>显著为负</div>
+      <div class="cell miss"><span class="c">−0.001</span>不显著</div>
+
+      <div class="rowh">本地化购买<br><span style="font-weight:400;font-size:11px;color:var(--ink3)">buy-local、国产化率</span></div>
+      <div class="cell hit"><span class="c">−0.0134***</span>显著为负</div>
+      <div class="cell miss"><span class="c">−0.0009</span>不显著</div>
+    </div>
+    <div class="g2 rv" style="--d:.44s;margin-top:22px;gap:22px">
+      <div class="card flat" style="border-left:3px solid var(--red)">
+        <p style="font-size:13.5px;line-height:1.7;color:var(--ink)">
+          <b>这套分工非常符合直觉：</b>直接壁垒打的是「往你这里卖货的人」；补贴与本地化购买打的是「已经在你境内经营的外资」——
+          后者失去原有优惠与准入条件，风险与不确定性上升。
+        </p>
+      </div>
+      <div class="card flat" style="border-left:3px solid var(--gold)">
+        <p style="font-size:13.5px;line-height:1.7;color:var(--ink)">
+          <b>和教材接上了：</b>教材 p.179–180 讲的印尼要求现代零售店 <b>80%</b> 卖本国产品，就是「本地化购买」的同类措施；
+          教材 p.169 那个「用补贴代替限进口」的框，就是「政府补贴」。
+        </p>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><span>论文二 · 表 5（9)–(14) 列　×　教材 pp.169、179–180</span><span>16 / 23</span></div>
+</section>
+
+<!-- ============ 17 三条渠道 ============ -->
+<section class="slide" data-part="PART 3 · 论文二" data-spk="C">
+  <div class="kicker rv"><span class="bar"></span>Part 3 · Paper 2</div>
+  <h1 class="rv" style="--d:.1s">渠道：政策 → <span class="hl">更贵的中间品</span> → <span class="hl">更弱的技术溢出</span> → <span class="hl">更低的参与度</span></h1>
+  <div class="body" style="justify-content:center">
+    <div class="chain rv" style="--d:.22s">
+      <div class="node"><b>贸易限制性政策</b><small>TRP ↑</small></div>
+      <div class="arrow">→</div>
+      <div class="node"><b>中间品贸易成本</b><small>+0.0027***</small></div>
+      <div class="arrow">→</div>
+      <div class="node"><b>技术溢出（TFP）</b><small>−0.0384*</small></div>
+      <div class="arrow">→</div>
+      <div class="node"><b>GVC 参与度</b><small>−0.0105*</small></div>
+      <div class="arrow">→</div>
+      <div class="node" style="border-color:var(--red);border-width:1.5px"><b>网络韧性 ↓</b><small>结论</small></div>
+    </div>
+    <div class="g3 rv" style="--d:.42s;margin-top:34px">
+      <div class="card flat"><p style="font-size:13px;line-height:1.65;color:var(--ink2)"><b>成本渠道：</b>关税、合规、本地化采购、库存与生产调整——都推高中间品采购成本，供应链的灵活性被吃掉。</p></div>
+      <div class="card flat"><p style="font-size:13px;line-height:1.65;color:var(--ink2)"><b>技术渠道：</b>外资准入门槛抬高、投资减少、技术信息交流变慢——溢出的范围与强度一起缩。</p></div>
+      <div class="card flat"><p style="font-size:13px;line-height:1.65;color:var(--ink2)"><b>参与度渠道：</b>进口端中间品流动受阻、出口端市场受限，参与度下滑又反过来降低效率。</p></div>
+    </div>
+    <p class="rv" style="--d:.56s;font-size:12.5px;color:var(--ink3);margin-top:18px">
+      技术溢出那一条把政策强度取了对数并滞后一期，理由是影响有滞后。
+    </p>
+  </div>
+  <div class="foot"><span>论文二 · 表 6 · 机制检验</span><span>17 / 23</span></div>
+</section>
+
+<!-- ============ 18 简单链 vs 复杂链 ============ -->
+<section class="slide" data-part="PART 3 · 论文二" data-spk="C">
+  <div class="kicker rv"><span class="bar"></span>Part 3 · Paper 2</div>
+  <h1 class="rv" style="--d:.1s">再拆一层：<span class="hl">跨境次数越多，越扛不住</span></h1>
+  <div class="body" style="justify-content:center">
+    <div class="rv" style="--d:.2s">
+      <div class="bars" style="max-width:900px">
+        <div class="brow" style="grid-template-columns:250px 1fr 96px"><div class="lab" style="text-align:left">参与 GVC 活动 · 外资</div>
+          <div class="track"><div class="fill" style="width:95%;--d:.26s"></div></div><div class="val">−0.0291***</div></div>
+        <div class="brow" style="grid-template-columns:250px 1fr 96px"><div class="lab" style="text-align:left">参与 GVC 活动 · 内资</div>
+          <div class="track"><div class="fill" style="width:100%;--d:.32s"></div></div><div class="val">−0.0306**</div></div>
+        <div class="brow" style="grid-template-columns:250px 1fr 96px"><div class="lab" style="text-align:left">复杂价值链 · 内资</div>
+          <div class="track"><div class="fill g" style="width:92%;--d:.38s"></div></div><div class="val">−0.0281**</div></div>
+        <div class="brow" style="grid-template-columns:250px 1fr 96px"><div class="lab" style="text-align:left">复杂价值链 · 外资</div>
+          <div class="track"><div class="fill g" style="width:72%;--d:.44s"></div></div><div class="val">−0.0219***</div></div>
+        <div class="brow" style="grid-template-columns:250px 1fr 96px"><div class="lab" style="text-align:left">简单价值链 · 外资</div>
+          <div class="track"><div class="fill k" style="width:46%;--d:.5s"></div></div><div class="val">−0.0139***</div></div>
+        <div class="brow" style="grid-template-columns:250px 1fr 96px"><div class="lab" style="text-align:left">简单价值链 · 内资</div>
+          <div class="track"><div class="fill k" style="width:0%;--d:.56s"></div></div><div class="val" style="color:var(--ink3)">不显著</div></div>
+      </div>
+    </div>
+    <div class="card flat rv" style="--d:.66s;margin-top:26px;border-left:3px solid var(--red);background:rgba(150,0,2,.045)">
+      <p style="font-size:13.5px;line-height:1.7;color:var(--ink)">
+        <b>读法：</b>复杂价值链（多次跨境）上，内外资都被显著打击；简单价值链（只跨一次境）上，只有外资被打。
+        <span style="color:var(--ink2)">结论一句话：跨境次数越多，暴露在政策风险下的面就越大——而中国的内资企业，在简单链上有本土链条顶着。</span>
+      </p>
+    </div>
+  </div>
+  <div class="foot"><span>论文二 · 表 7 · 进一步分析</span><span>18 / 23</span></div>
+</section>
+
+<!-- ============ 19 对照 ============ -->
+<section class="slide" data-part="PART 4 · 对照与批判" data-spk="D">
+  <div class="kicker rv"><span class="bar"></span>Part 4 · Synthesis</div>
+  <h1 class="rv" style="--d:.1s">两篇放在一起：看起来相反，其实是<span class="hl">同一件事的两面</span></h1>
+  <div class="body" style="justify-content:center">
+    <table class="rv" style="--d:.2s;font-size:12.5px">
+      <tr><th style="width:15%">维度</th><th style="width:42%">论文一（337）</th><th style="width:43%">论文二（GTA 措施）</th></tr>
+      <tr><td class="strong">冲击口径</td><td>一种具体壁垒（IP 执行） × 一个出口国</td><td>一整篮子措施（50 类） × 所有国家</td></tr>
+      <tr><td class="strong">被解释变量</td><td>对非美市场出口的双边际（EM / IM）</td><td>PageRank 网络位置的变化率（韧性）</td></tr>
+      <tr><td class="strong">分析单位</td><td>目的地国 × HS2 行业 × 年</td><td>国家 × 行业 × 内外资 × 年</td></tr>
+      <tr><td class="strong">识别策略</td><td>强度 DID（Post × Exposure）+ 双边际分解</td><td>三重固定效应面板 + IV（2SLS）+ PSM</td></tr>
+      <tr><td class="strong">核心结论</td><td>壁垒<b>促成了转移</b>：品种更宽、份额更高</td><td>壁垒<b>削弱了韧性</b>：外资更脆，复杂链更脆</td></tr>
+      <tr><td class="strong">谁是受害者</td><td>不是「出口消失」，而是<b>市场结构被迫重组</b></td><td>是<b>国家在网络中的位置</b>与外资的生存条件</td></tr>
+    </table>
+    <div class="quote rv" style="--d:.5s;margin-top:26px;max-width:1120px;font-size:21px">
+      转移是企业的<em>自救</em>，韧性下降是国家的<em>代价</em>——两篇文章各拍了一张照片，拼起来才是全景。
+    </div>
+  </div>
+  <div class="foot"><span>PART 4 · 对照</span><span>19 / 23</span></div>
+</section>
+
+<!-- ============ 20 五条低估理由 ★ ============ -->
+<section class="slide" data-part="PART 4 · 对照与批判" data-spk="D">
+  <div class="kicker rv"><span class="bar"></span>Part 4 · 全场的高潮</div>
+  <h1 class="rv" style="--d:.1s">把两篇钉回教材：<span class="hl">五条「低估理由」被逐条实证</span></h1>
+  <p class="lead rv" style="--d:.14s">教材 p.183 说：真实成本可能明显更高，但很难说高多少。这两篇文章填上了一个答案。</p>
+  <div class="body" style="justify-content:center">
+    <table class="rv" style="--d:.22s;font-size:12px">
+      <tr><th style="width:24%">教材的五条低估理由</th><th style="width:48%">两篇论文里对应的证据</th><th style="width:28%">判定</th></tr>
+      <tr><td class="strong">① 外国报复</td><td>论文一：壁垒使出口转向第三国，第三国市场被挤压——教材未写的「转移成本」</td><td>被具体化为第三方市场再配置</td></tr>
+      <tr><td class="strong">② 执法成本</td><td>论文一：337 的律师费、合规调整、客户采购风险评估</td><td class="sig">部分实证（成本渠道）</td></tr>
+      <tr><td class="strong">③ 寻租成本</td><td>两篇都未直接测（论文二用政策频次，不测游说）</td><td style="color:var(--ink3)">仍是空白</td></tr>
+      <tr><td class="strong">④ 租金流向外国</td><td>两篇都未直接测（VER 类案例不在样本内）</td><td style="color:var(--ink3)">仍是空白</td></tr>
+      <tr><td class="strong">⑤ 创新与品种减少</td><td>论文二：TFP 下降 −0.0384、GVC 参与度下降 −0.0105，且损失沿网络放大</td><td class="sig">核心实证</td></tr>
+    </table>
+    <div class="card flat rv" style="--d:.5s;margin-top:20px;border-left:3px solid var(--red);background:rgba(150,0,2,.05)">
+      <p style="font-size:14px;line-height:1.72;color:var(--ink)">
+        <b>所以我们这场 pre 的结论：</b>教材算的那块三角形没有算错，它只是<b>只算了本国市场里的一小块</b>。
+        真实的代价会沿着价值链传导、在复杂链条上被放大、并且以「网络位置下滑」的形式留在账上。
+        <span style="color:var(--red)">三角形是下限，不是答案。</span>
+      </p>
+    </div>
+  </div>
+  <div class="foot"><span>教材 pp.182–184　×　论文一 §5.5、论文二 表 1、表 6</span><span>20 / 23</span></div>
+</section>
+
+<!-- ============ 21 批判 ============ -->
+<section class="slide" data-part="PART 4 · 对照与批判" data-spk="D">
+  <div class="kicker rv"><span class="bar"></span>Part 4 · Critique</div>
+  <h1 class="rv" style="--d:.1s">批判性评价：<span class="hl">两篇各自的软肋</span></h1>
+  <div class="body" style="justify-content:center">
+    <div class="g2" style="gap:28px">
+      <div class="rv" style="--d:.2s">
+        <p style="font-family:var(--mono);font-size:11.5px;color:var(--red);letter-spacing:.1em;margin-bottom:10px">PAPER 1 · 337</p>
+        <table style="font-size:12px">
+          <tr><td class="strong" style="width:36%">处理定义</td><td>同一行业后续案件被并入「已处理」，但每次新立案其实是新冲击</td></tr>
+          <tr><td class="strong">暴露度基数</td><td>用首案前一年对美出口，若企业已按预期提前转移，基数就被污染</td></tr>
+          <tr><td class="strong">分析层级</td><td>只有行业层面，分不清「新企业进入」与「存量企业扩产」</td></tr>
+          <tr><td class="strong">机制检验</td><td>把中间结果当因变量，非正式中介分解——作者自称只说「与渠道一致」</td></tr>
+          <tr><td class="strong">分母问题</td><td>EM/IM 的分母是「该国从世界进口」，含中国自身份额；未做质量调整</td></tr>
+        </table>
+      </div>
+      <div class="rv" style="--d:.34s">
+        <p style="font-family:var(--mono);font-size:11.5px;color:var(--gold);letter-spacing:.1em;margin-bottom:10px">PAPER 2 · GTA</p>
+        <table style="font-size:12px">
+          <tr><td class="strong" style="width:36%">指标构造</td><td>核心变量是「频次」，一项关税与一项技术标准被等权相加，经济当量不同</td></tr>
+          <tr><td class="strong">韧性维度</td><td>只取抵抗力，放弃恢复力/发展力——「当年掉下去」≠「起不来」</td></tr>
+          <tr><td class="strong">样本窗口</td><td>2009–2016，正好错过 2018–2019 中美贸易战这一最大冲击</td></tr>
+          <tr><td class="strong">基期选择</td><td>以 2005–2007 为稳定基准，结果对基期敏感</td></tr>
+          <tr><td class="strong">工具变量</td><td>「措施种类数」与「产出价格指数」的排他性约束可议</td></tr>
+        </table>
+      </div>
+    </div>
+    <p class="rv" style="--d:.52s;font-size:13px;color:var(--ink2);margin-top:20px;line-height:1.7">
+      <b>一句话总评：</b>两篇都做了扎实的稳健性，但都属于「识别出一个稳健的相关性」，而不是「算出了一个可信的福利数值」。
+      所以正确的读法是：<span style="color:var(--red)">它们证明「代价被低估」，而不是「代价等于某个具体数字」。</span>
+    </p>
+  </div>
+  <div class="foot"><span>PART 4 · 批判</span><span>21 / 23</span></div>
+</section>
+
+<!-- ============ 22 政策启示 ============ -->
+<section class="slide" data-part="PART 4 · 对照与批判" data-spk="D">
+  <div class="kicker rv"><span class="bar"></span>Part 4 · Implications</div>
+  <h1 class="rv" style="--d:.1s">政策启示：<span class="hl">三层</span>，都从论文里长出来</h1>
+  <div class="body" style="justify-content:center">
+    <div class="g3" style="margin-top:4px">
+      <div class="card rv" style="--d:.2s">
+        <span class="tagx">LEVEL 01 · 国家</span>
+        <h3>不要把以邻为壑当安全</h3>
+        <p>论文二：损失会沿网络放大回来。主张回到 WTO 多边框架、减少过度保护主义干预，避免技术与市场双重封闭。</p>
+      </div>
+      <div class="card rv" style="--d:.3s">
+        <span class="tagx">LEVEL 02 · 行业</span>
+        <h3>多元化 + 关键中间品</h3>
+        <p>推进产业链多元化布局，提升关键中间品供应稳定性；加大制造业与高技术产业的技术创新支持，提高附加值。</p>
+      </div>
+      <div class="card rv" style="--d:.4s">
+        <span class="tagx">LEVEL 03 · 企业</span>
+        <h3>按产品属性分工应对</h3>
+        <p>高技术、专利密集：先做 FTO 检索、协调海外专利组合、完成目的地认证再扩品种。<br>
+           非高技术：先守住客户与分销渠道，靠份额扩张。</p>
+      </div>
+    </div>
+    <div class="card flat rv" style="--d:.54s;margin-top:24px">
+      <p style="font-size:13.5px;line-height:1.7;color:var(--ink2)">
+        <b>论文一还提了一个很具体的制度建议：</b>建立产品层面的知识产权执法风险预警系统——把 337 立案信息、HS6 暴露度、
+        专利归属、程序节点与排除令风险放在一起监控，对高暴露行业提供及时的法律指引与目的地市场准入信息。
+      </p>
+    </div>
+  </div>
+  <div class="foot"><span>论文一 §6 · 论文二 结论与启示</span><span>22 / 23</span></div>
+</section>
+
+<!-- ============ 23 结论 ============ -->
+<section class="slide dark" data-part="CONCLUSION" data-spk="ALL">
+  <div class="body" style="justify-content:center">
+    <div class="kicker rv"><span class="bar"></span>Conclusion</div>
+    <h1 class="rv" style="--d:.14s;font-size:38px;line-height:1.4;margin-top:26px;max-width:1080px">
+      教材教我们把非关税壁垒算成<em style="font-style:normal;color:var(--gold)">一块三角形</em>；<br>
+      这两篇论文告诉我们，真实的代价<br>
+      <em style="font-style:normal;color:var(--gold)">不在三角形里，而在一张网的形状里。</em>
+    </h1>
+    <div class="rv" style="--d:.34s;margin-top:34px;width:76px;height:2px;background:var(--gold)"></div>
+    <p class="lead rv" style="--d:.46s;font-size:15px;margin-top:26px;max-width:860px">
+      三角形的结论是：配额未必比关税更糟，损失可能只有 0.2% 的 GDP。<br>
+      网络视角的结论是：损失会转移、会传导、会在复杂链条上放大，并以外资撤离与位置下滑的形式留下来。
+    </p>
+    <p class="rv" style="--d:.62s;font-family:var(--mono);font-size:12.5px;color:#9a9183;letter-spacing:.08em;margin-top:40px">
+      THANK YOU　·　QUESTIONS
+    </p>
+  </div>
+  <div class="foot"><span>PART 4 END　·　欢迎提问</span><span>23 / 23</span></div>
+</section>
+
+</div>
+</div>
+
+
+<!-- I18N-UI-START -->
+<div class="langbar" id="langbar">
+  <button class="langbtn active" data-lang="zh">中文</button>
+  <button class="langbtn" data-lang="en">EN</button>
+</div>
+<!-- I18N-UI-END -->
+
+<div class="hud"><div class="prog" id="prog"></div></div>
+<div class="counter" id="counter">01 / 23</div>
+<div class="hint" id="hint">← → 翻页　·　F 全屏</div>
+
+<script>
+(function(){
+  var deck=document.getElementById('deck');
+  var slides=[].slice.call(document.querySelectorAll('.slide'));
+  var prog=document.getElementById('prog');
+  var counter=document.getElementById('counter');
+  var hint=document.getElementById('hint');
+  var i=0,n=slides.length;
+
+  function fit(){
+    var s=Math.min(window.innerWidth/1280, window.innerHeight/720);
+    deck.style.transform='scale('+s+')';
+  }
+  window.addEventListener('resize',fit); fit();
+
+  function go(k){
+    if(k<0)k=0; if(k>n-1)k=n-1;
+    if(k===i)return;
+    slides[i].classList.remove('active');
+    i=k;
+    slides[i].classList.add('active');
+    progress();
+  }
+  function progress(){
+    prog.style.width=((i+1)/n*100)+'%';
+    counter.textContent=String(i+1).padStart(2,'0')+' / '+String(n).padStart(2,'0');
+  }
+
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key==='ArrowDown'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(i+1);}
+    else if(e.key==='ArrowLeft'||e.key==='ArrowUp'||e.key==='PageUp'){e.preventDefault();go(i-1);}
+    else if(e.key==='Home'){go(0);}
+    else if(e.key==='End'){go(n-1);}
+    else if(e.key==='f'||e.key==='F'){
+      if(!document.fullscreenElement){document.documentElement.requestFullscreen();}
+      else{document.exitFullscreen();}
+    }
+  });
+
+  // 点击左右半屏翻页
+  document.addEventListener('click',function(e){
+    if(e.clientX < window.innerWidth*0.28) go(i-1); else go(i+1);
+  });
+
+  // 触屏滑动
+  var x0=null;
+  document.addEventListener('touchstart',function(e){x0=e.touches[0].clientX;},{passive:true});
+  document.addEventListener('touchend',function(e){
+    if(x0===null)return;
+    var dx=e.changedTouches[0].clientX-x0;
+    if(Math.abs(dx)>55){ dx<0?go(i+1):go(i-1); }
+    x0=null;
+  },{passive:true});
+
+  setTimeout(function(){hint.classList.add('hide');},4500);
+  progress();
+})();
+</script>
+
+<!-- I18N-JS-START -->
+<script>
+(function(){
+  var TR = new Map([["非关税壁垒的真实代价 · 第9章小组汇报", "The Real Cost of Non-Tariff Barriers · Chapter 9 Group Presentation"], ["非关税壁垒的", "The Real Cost of"], ["真实代价", "Non-Tariff Barriers"], ["从「一块三角形」到「一张网络的形变」", "From a deadweight-loss triangle to the deformation of a network"], ["教材第九章教你用无谓损失三角形衡量非关税壁垒；两篇 2026 年的实证论文告诉我们， 代价其实外溢到第三方市场、中间品成本与全球价值链的网络位置上。", "Chapter 9 teaches you to measure non-tariff barriers with a deadweight-loss triangle. Two empirical papers published in 2026 show that the cost actually spills over into third markets, into intermediate-input costs, and into a country's position in the global value chain network."], ["乔小勇等 (2026)，《管理评论》38(8)", "Qiao Xiaoyong et al. (2026), Management Review 38(8)"], ["小组汇报 · 四人分工 A / B / C / D", "Group presentation · four speakers, A / B / C / D"], ["今天只回答四个问题", "Four questions, and nothing else"], ["关税退潮之后，保护跑到哪里去了？", "Where did protection go once tariffs came down?"], ["教材第九章的框架：三条渠道、八类壁垒、一块三角形", "The Chapter 9 framework: three channels, eight types of barriers, one triangle"], ["一种新型壁垒如何起作用？", "How does a new kind of barrier actually work?"], ["论文一：美国 337 调查（知识产权执行型壁垒）与出口转移", "Paper 1: U.S. Section 337 investigations (IP enforcement as a trade barrier) and export reallocation"], ["代价到底有多大？", "How large is the cost, really?"], ["论文二：50 类贸易限制性措施与全球价值链网络韧性", "Paper 2: fifty types of trade-restrictive measures and GVC network resilience"], ["教材算漏了什么？", "What did the textbook leave out?"], ["对照、批判与结论：五条「低估理由」逐条被实证", "Comparison, critique and conclusion: the five understatement arguments, tested one by one"], ["PART 0 · 路线图", "PART 0 · ROADMAP"], ["底座①：非关税壁垒只有", "FOUNDATION 1: NON-TARIFF BARRIERS HAVE ONLY"], ["三条", "THREE"], ["作用路径", "TRANSMISSION CHANNELS"], ["NTB = 关税以外、用于减少进口的一切政策（教材 p.161）。它不管长什么样，最终都通过下面三条渠道之一生效。", "An NTB is any government policy, other than a simple import tariff, used to reduce imports (textbook p.161). Whatever form it takes, it works through one of the three channels below."], ["把数量卡住", "Limit the quantity"], ["进口配额 · 自愿出口限制 VER · 关税配额的禁止性高档 · 政府采购明令禁买", "Import quotas · voluntary export restraints (VERs) · prohibitive above-quota tariff rates · outright buy-domestic procurement rules"], ["把成本抬高", "Raise the cost"], ["产品标准与认证 · 国产化率与混合要求 · 进口押金 · 海关归类与估价程序", "Product standards and certification · domestic content and mixing requirements · advance import deposits · customs classification and valuation"], ["把不确定性做大", "Create uncertainty"], ["进口许可审批时限不明 · 标准执行尺度模糊 · 立案与调查本身改变预期", "Opaque licensing timelines · discretionary enforcement of standards · the investigation itself shifting expectations"], ["记住第三条渠道", "Remember the third channel"], ["：教材图 9.1 的右列里，只有「技术与产品标准 / 进口许可 / 海关程序」这三类会制造不确定性。 等下讲论文一会回来用它——", ": in the right-hand column of Figure 9.1, only technical and product standards, import licensing and customs procedures generate uncertainty. We come back to this in Paper 1:"], ["337 调查最厉害的杀伤力，恰恰不在数量，而在这一条。", "the most damaging part of a Section 337 investigation is not the quantity restriction, it is this channel."], ["教材 pp.161–163 · 图 9.1", "Textbook pp.161–163 · Figure 9.1"], ["底座②：把非关税壁垒", "FOUNDATION 2: CONVERT NON-TARIFF BARRIERS"], ["折算成关税", "INTO TARIFF EQUIVALENTS"], ["，它比关税更重", ", AND THEY WEIGH MORE THAN TARIFFS"], ["墨西哥", "Mexico"], ["欧盟", "European Union"], ["日本", "Japan"], ["中国", "China"], ["美国", "United States"], ["加拿大", "Canada"], ["数据：Kee et al. (2009)，教材 p.162–163。等值关税 = 能造成同等进口量减少的关税税率。", "Data: Kee et al. (2009), textbook pp.162–163. The tariff equivalent is the tariff rate that would cut imports by the same amount."], ["教材的结论很直接：", "The textbook's conclusion is blunt:"], ["就限制世界贸易而言，非关税壁垒比关税更重要。", "in restricting world trade, non-tariff barriers matter more than tariffs."], ["道理也不难：关税谈了七十年，从 40% 谈到个位数；而壁垒换个形式就能绕开谈判桌—— 这正是本章存在的理由。", "The reason is simple: tariffs have been negotiated down for seventy years, from around 40 percent to single digits, while barriers simply change form and step around the negotiating table. That is why this chapter exists."], ["六个主要经济体的 NTB 等值关税区间", "Range of NTB tariff equivalents across six major economies"], ["对发展中国家而言，这个数值通常更高", "For developing economies the figure is usually higher"], ["教材 pp.162–163 · Kee et al. (2009)", "Textbook pp.162–163 · Kee et al. (2009)"], ["底座③：一块三角形，算出保护的账", "FOUNDATION 3: ONE TRIANGLE IS THE WHOLE ACCOUNTING"], ["进口量（百万辆／年）", "Imports (millions of vehicles per year)"], ["世界价 300 美元，自由贸易进口 100 万辆；配额压到", "The world price is $300 and free-trade imports are 1.0 million. A quota cuts imports to"], ["60 万辆", "0.6 million"], ["，国内价涨到", ", lifting the domestic price to"], ["330 美元", "$330"], ["生产者剩余增加", "Gain in producer surplus"], ["归生产者", "to producers"], ["生产扭曲：本国造 20 万辆，成本最高到 330", "Production distortion: 0.2 million more made at home, marginal cost up to $330"], ["净损失", "deadweight loss"], ["进口加价：30 美元 × 60 万辆", "Import markup: $30 × 0.6 million"], ["归谁？", "goes to whom?"], ["消费扭曲：消费从 160 万降到 140 万", "Consumption distortion: consumption falls from 1.6 to 1.4 million"], ["配额与等量关税", "A quota and an equivalent tariff"], ["唯一的差别就是 c 归谁", "differ only in who captures area c"], ["：拍卖给政府、固定偏袒给进口商、靠排队游说去抢就变成社会浪费——", ": auctioned to the government, handed to importers under fixed favoritism, or dissipated through queuing and lobbying."], ["最后一种情况下，配额比关税更糟。", "In the last case the quota is worse than the tariff."], ["全部关税的净损失公式代入", "All tariffs, substituted into the loss formula"], ["占 GDP 比重——看起来很小", "of GDP, which looks small"], ["但绝对值相当于 400 亿美元", "yet equals roughly $40 billion"], ["教材 pp.163–165、182–184 · 图 9.2", "Textbook pp.163–165, 182–184 · Figure 9.2"], ["Part 1 · 转折", "PART 1 · TURNING POINT"], ["但教材自己留了", "BUT THE TEXTBOOK LEAVES"], ["两个口子", "TWO GAPS OPEN"], ["这正是今天两篇论文的入口——我们不是跑题，是去补课。", "That is exactly where today's two papers enter. We are not going off-topic; we are filling the gaps."], ["只做局部均衡的静态福利", "Partial-equilibrium, static welfare only"], ["只算本国市场里那一块 b+d。至于外国报复、执法成本、寻租、租金流向外国、创新与品种减少， 教材列了五条，然后说：", "It counts only areas b and d inside the domestic market. Foreign retaliation, enforcement costs, rent seeking, rents to foreign exporters, and lost innovation and product variety are listed as five qualifications, and then:"], ["「真实成本可能明显更高，但很难说高出多少。」", "the true cost could be noticeably larger, but it is not easy to say by how much."], ["→ 论文二来接这句话：把「很难说」量化成可观测的网络指标。", "Paper 2 picks up that sentence and makes the unquantified part measurable."], ["壁垒清单与案例都已过时", "The list of barriers and the cases are out of date"], ["图 9.1 的八类壁垒里没有「知识产权执行」；争端部分讲了 301 条款，却没讲 337 调查； 最新的案例停在 2018 年的钢铁 VER。", "The eight barrier types in Figure 9.1 do not include IP enforcement; the disputes section discusses Section 301 but not Section 337; the most recent case stops at the 2018 steel VERs."], ["→ 论文一来补这一块：2014–2023 年的 337 调查。", "Paper 1 fills this gap with Section 337 investigations from 2014 to 2023."], ["教材算的是", "The textbook measures"], ["一块面积", "an area"], ["，两篇论文算的是", "; the two papers measure"], ["一张网的形变", "the deformation of a network"], ["PART 1 END · 交接给 B", "END OF PART 1 · HAND OVER TO B"], ["论文一：把「知识产权执行」当成一种贸易壁垒", "Paper 1: treating IP enforcement as a trade barrier"], ["94: 352–369 | 美国", "94: 352–369 | U.S."], ["337 调查", "Section 337 investigations"], ["（USITC 受理）与中国行业层面的出口转移", " (USITC) and industry-level export reallocation in China"], ["2014–2023 年立案总数", "cases instituted, 2014–2023"], ["USITC / EDIS 官方记录", "official USITC / EDIS records"], ["被告来自中国大陆的案件数，占 41.2%", "cases with respondents from mainland China, 41.2% of the total"], ["2019 年峰值 26 起", "peak of 26 cases in 2019"], ["2023 年涉华案件占比（最高年份）", "China-related share in 2023, the highest year"], ["集中于通信设备 / 半导体 / 计算机", "concentrated in telecom equipment, semiconductors, computers"], ["337 是什么：", "What Section 337 is:"], ["由美国国际贸易委员会审理，针对进口贸易中的不公平做法，最主要的基础是", "heard by the U.S. International Trade Commission, it targets unfair practices in import trade, most often"], ["专利侵权", "patent infringement"], ["。 与普通专利诉讼不同——它可以下", ". Unlike ordinary patent litigation it can issue an"], ["排除令（exclusion order）", "exclusion order"], ["或停止令，直接限制涉案产品在美国的进口与销售。", "or a cease-and-desist order, restricting imports and sales in the U.S. market directly."], ["教材 p.184 讲的 301 条款是它的同族：都是美国国内程序、都绕开 WTO 争端解决。", "Section 301, discussed on p.184, is its close relative: both are unilateral U.S. procedures that bypass WTO dispute settlement."], ["教材 p.184–185（301 与 WTO 争端解决）→ 本文的 337", "Textbook pp.184–185 (Section 301 and WTO dispute settlement) → Section 337 here"], ["它其实是", "It works through"], ["三条渠道同时发力", "ALL THREE CHANNELS AT ONCE"], ["，而论文抓的是第三条", ", AND THE PAPER CAPTURES THE THIRD"], ["用教材图 9.1 的框架去拆 337，三列立刻对齐。", "Run Section 337 through the Figure 9.1 framework and the three columns line up immediately."], ["数量渠道", "Quantity channel"], ["排除令、停止令直接禁止进口与销售。一旦落地，进口量被硬切。", "Exclusion and cease-and-desist orders ban imports and sales outright. Once in force, the import quantity is cut."], ["成本渠道", "Cost channel"], ["律师费、合规调整、下游客户的采购风险评估——都是真实支出。", "Legal fees, compliance adjustments and procurement risk assessments by downstream customers: all real resource costs."], ["不确定性渠道 ← 论文真正识别的", "Uncertainty channel ← what the paper actually identifies"], ["立案本身就会改变对美市场准入的预期。", "The institution of an investigation itself changes expectations about access to the U.S. market."], ["很多案件最终并没有下排除令，订单却已经走了。", "Many cases never end in an exclusion order, yet the orders have already moved."], ["这一页的意义：教材图 9.1 里那个「不确定性」列，", "The point of this slide: the uncertainty column in Figure 9.1"], ["不是修辞，是一条文独立起作用的渠道", "is not rhetoric, it is a channel that works on its own"], ["——现在有了实证。", ", and it now has empirical evidence."], ["教材 p.161–162 · 图 9.1 右列", "Textbook pp.161–162 · Figure 9.1, right-hand column"], ["数据与识别：", "Data and identification:"], ["强度 DID", "an intensity DID"], ["双边际分解", "with dual-margin decomposition"], ["：该行业进入首案之后的年份＝1", ": equals 1 from the year of the industry's first investigation onward"], ["：首案", ": in the year"], ["前一年", "before the first case"], ["、涉案 HS6 产品占该行业对美出口的比重（样本期内固定）", ", the share of the investigated HS6 products in the industry's total exports to the U.S. (fixed over the sample period)"], ["EM 广延边际", "EM, the extensive margin"], ["＝中国出口的 HS6 品种，覆盖了目的地该行业进口需求的多大比例", " = the share of the destination's industry-level import demand covered by China's exported HS6 varieties"], ["IM 集约边际", "IM, the intensive margin"], ["＝在中国已进入的那些产品上，中国占该国进口的比重", " = China's share of the destination's imports in the products it has already entered"], ["项目", "Item"], ["设定", "Specification"], ["观测单位", "Unit of observation"], ["非美目的地国 × HS2 行业 × 年", "non-U.S. destination × HS2 industry × year"], ["样本", "Sample"], ["2014–2023；只保留 HS 第 28–96 章（剔除农产品与资源品）", "2014–2023; HS chapters 28–96 only (agricultural and resource-based products excluded)"], ["观测数", "Observations"], ["标准误", "Standard errors"], ["目的地国家层面聚类", "clustered at the destination-country level"], ["数据源", "Data sources"], ["CEPII-BACI｜WITS 关税｜USITC EDIS｜World Bank｜CEPII 引力变量｜Heritage", "CEPII-BACI | WITS tariffs | USITC EDIS | World Bank | CEPII gravity variables | Heritage Foundation"], ["控制变量", "Controls"], ["双边 GDP、加权距离、RTA、共同语言 / 宗教 / 法系、经济自由度限制", "Bilateral GDP, weighted distance, RTA, common language, religion and legal origin, economic-freedom restriction"], ["论文一 §4 · 研究设计", "Paper 1, §4 · Research design"], ["主结果：", "Main results:"], ["两条腿都在走", "BOTH MARGINS MOVE"], ["——品种变宽，份额也变高", " — wider product coverage and higher shares"], ["广延边际 EM", "Extensive margin (EM)"], ["产品种类覆盖更宽", "Wider product coverage"], ["集约边际 IM", "Intensive margin (IM)"], ["已有产品份额更高", "Higher shares in existing products"], ["含控制变量；*** p<0.01。无控制变量时为 0.326 / 0.106。", "With controls; *** p<0.01. Without controls: 0.326 / 0.106."], ["八道稳健性检验，方向全部不变", "Eight robustness checks, same sign throughout"], ["平行趋势 事前≈0", "Parallel trends: pre-period ≈ 0"], ["安慰剂 500 次抽样", "Placebo: 500 random assignments"], ["换金额", "Export value"], ["换数量", "Export quantity"], ["剔极端国 0.304 / 0.129", "Drop extreme countries: 0.304 / 0.129"], ["剔 2020 后 0.219 / 0.156", "Drop 2020 onward: 0.219 / 0.156"], ["双向 FE 0.038 / 0.031", "Two-way FE: 0.038 / 0.031"], ["没有消灭", "did not eliminate"], ["中国相关行业的出口，而是把它", "Chinese exports in the affected industries; it pushed them"], ["推到了别处", "elsewhere"], ["——这就是「贸易转移」。", ". This is export reallocation."], ["论文一 §5.1、§5.4 · 表 3、表 4", "Paper 1, §5.1 and §5.4 · Tables 3 and 4"], ["转移不是乱转：", "Reallocation is not random:"], ["三个机制", "THREE MECHANISMS"], ["同时成立", "ALL HOLD AT ONCE"], ["需求匹配（去进口需求大的市场）", "Demand matching (go where import demand is large)"], ["既有贸易关系（复用渠道）", "Pre-existing trade relationships (reuse the channel)"], ["转向低关税市场", "Shift toward lower-tariff markets"], ["短期的做法：", "In the short run:"], ["先靠已经建好的渠道吸收，而不是从零开新市场——新市场要沉没成本。", "absorb through channels that already exist rather than open new markets, which carry sunk costs."], ["去哪里的做法：", "Where to go:"], ["挑关税低的地方去，降低切换成本。", "choose destinations with lower tariffs to reduce the cost of switching."], ["谁接得住：", "Who can absorb it:"], ["进口需求越大的市场越能吸收——转移是被需求拉着走的。", "markets with larger import demand absorb more, so the reallocation is demand-pulled."], ["【提醒】作者自己写明：机制检验是把中间结果当因变量回归，不是正式的中介分解——只能说「与这些渠道一致」。这一条我们在最后一节批判时会用到。", "[Caveat] The authors state that the mechanism tests regress intermediate outcomes on the shock and are not a formal mediation decomposition, so the evidence is consistent with these channels rather than proof of them. We return to this in the critique."], ["论文一 §5.5 · 表 5", "Paper 1, §5.5 · Table 5"], ["谁转移得更多：", "Who reallocates more:"], ["四组异质性", "FOUR CUTS OF HETEROGENEITY"], ["按目的地收入水平（EM）", "By destination income level (EM)"], ["高收入", "High income"], ["中上", "Upper-middle"], ["中下", "Lower-middle"], ["低收入", "Low income"], ["集约边际在低收入国为", "The intensive margin in low-income markets is"], ["：低收入市场只承接了更多品种，没承接份额。", ": low-income markets absorbed more varieties but not more share."], ["按产品属性", "By product characteristics"], ["高技术", "High-tech"], ["非高技", "Non-high-tech"], ["高技术品靠", "High-technology products adjust through"], ["铺品种", "broader product coverage"], ["（要重做认证与专利安排）；中低技术品标准化，靠", " (overseas certification and patent arrangements have to be redone), while standardized lower-technology products rely on"], ["提份额", "higher shares"], ["最反直觉的一组：", "The least intuitive result:"], ["非差异化产品 EM 高达", "non-differentiated products reach an EM of"], ["但 IM 为", "but an IM of"], ["； 差异化产品 EM 只有 0.110，IM 却是 +0.102。", "; differentiated products have an EM of only 0.110 but an IM of +0.102."], ["解释：标准化商品谁都能替代，只能靠「多上几个品种」去占位，价格战下守不住份额； 差异化商品靠品牌与客户黏性，反而能在既有市场里越做越深。", "Standardized goods are easy to substitute, so exporters can only take positions by adding varieties and cannot hold share under price competition; differentiated goods rely on brand and customer stickiness and deepen within markets already entered."], ["论文一 §5.6 · 表 6–9", "Paper 1, §5.6 · Tables 6–9"], ["论文二：不看出口去哪，", "Paper 2: forget where exports go,"], ["看网络位置还剩多少", "LOOK AT HOW MUCH NETWORK POSITION IS LEFT"], ["乔小勇、郑闽荟、侯婷彧（2026），《管理评论》38(8) | 贸易限制性政策与全球价值链网络韧性", "Qiao Xiaoyong, Zheng Minhui and Hou Tingyu (2026), Management Review 38(8) | trade-restrictive policies and GVC network resilience"], ["创新 01", "CONTRIBUTION 01"], ["不研究单一壁垒", "Not one barrier, but a whole basket"], ["把 GTA 数据库里", "Bundle the"], ["50 类", "fifty types"], ["贸易限制性措施打包成一个强度指标。理由：现实是多种措施同时砸下来，只看一种会低估。", " of trade-restrictive measures in the GTA database into a single intensity index. The reason: in practice many measures hit at once, and looking at one understates the shock."], ["创新 02", "CONTRIBUTION 02"], ["区分内资与外资", "Separate domestic from foreign-invested firms"], ["在价值链里，跨国公司不是「又一个企业」。内资和外资受到的政策冲击完全不同，必须分开看。", "In a value chain a multinational is not just another firm. Domestic and foreign-invested firms face completely different shocks and must be studied separately."], ["创新 03", "CONTRIBUTION 03"], ["用 PageRank 定义网络韧性", "Define resilience with PageRank centrality"], ["先算各国各行业节点在网络中的中心度，再算", "Compute each country-industry node's centrality in the network, then take"], ["该节点的变化率相对于全网变化率", "its rate of change relative to that of the whole network"], ["——测的是「冲击下网络地位的相对稳定性」。", ", which measures the relative stability of network position under a shock."], ["为什么只看「抵抗力」这一个维度？", "Why only the resistance dimension?"], ["作者的理由是：韧性包含抵抗力、恢复力、发展力，但恢复力与发展力都是", "Because resilience has three dimensions, resistance, recovery and development, and the latter two are"], ["事后调整", "ex post adjustments"], ["， 救不了初始损失。所以本文只测「冲击当期，这个节点能不能守住位置」。基期取 2005–2007 年（金融危机前、格局最稳）。", " that cannot undo the initial loss. The paper therefore measures whether a node holds its position in the shock year. The base period is 2005–2007, before the financial crisis, when the structure was stable."], ["论文二 · 引言与指标测度", "Paper 2 · Introduction and measurement"], ["两套数据库", "TWO DATABASES"], ["拼成一张面板", "INTO ONE PANEL"], ["网络底表", "Network data"], ["OECD-AMNE 投入产出表：58 国 × 34 行业，区分内外资", "OECD-AMNE input-output tables: 58 countries × 34 industries, with domestic and foreign-invested firms separated"], ["政策底表", "Policy data"], ["GTA 全球贸易预警库：50 类措施，取「红色」肯定性限制措施", "GTA Global Trade Alert: 50 measure types, using the red, definitely restrictive measures"], ["匹配链条", "Concordance"], ["2009–2016 年，", "2009–2016,"], ["个观测", "observations"], ["固定效应", "Fixed effects"], ["时间 + 国家 + 行业（三重）", "year, country and industry (three-way)"], ["内生性", "Endogeneity"], ["工具变量：措施种类总数、行业产出价格指数；辅以 PSM", "instruments: total number of measure types, industry output price index; supplemented by PSM"], ["GTA：政策强度", "GTA: policy intensity"], ["TRP = 该国该行业当年被限制措施命中的频次", "TRP = the number of restrictive measures hitting that country-industry in that year"], ["OECD-AMNE：网络位置", "OECD-AMNE: network position"], ["PageRank 中心度（阻尼因子 0.85）", "PageRank centrality (damping factor 0.85)"], ["韧性 = 节点变化率 / 全网变化率", "Resilience = node change / network change"], ["分母取绝对值；基期 2005–2007", "denominator in absolute value; base period 2005–2007"], ["论文二 · 模型构建与数据处理", "Paper 2 · Model and data"], ["外资企业比内资脆弱约 5 倍", "Foreign-invested firms are about five times more exposed"], ["外资企业", "Foreign-invested"], ["内资企业", "Domestic"], ["t 值分别为 −5.05 与 −3.86，均在 1% 水平显著", "t-statistics −5.05 and −3.86, both significant at the 1 percent level"], ["作者的解释：外资企业跨国运营、依赖全球供应链、还要看东道国政策脸色；", "The authors' explanation: foreign-invested firms operate across borders, depend on global supply chains and are exposed to host-country policy;"], ["内资企业有本土供应链与产业集群作缓冲", "domestic firms are buffered by local supply chains and industrial clusters"], ["，所以冲击被部分吸收。", ", so the shock is partly absorbed."], ["换加权/换指标/加FE 全部显著为负", "Re-weighting, alternative measures and extra FE: all significantly negative"], ["论文一说的是", "Paper 1 shows that"], ["出口换了个地方", "exports moved somewhere else"], ["；论文二说的是", "; Paper 2 shows that"], ["你在网络里的位置往下掉", "your position in the network moved down"], ["。后者才是国家的账。", ". The second is what lands on the national balance sheet."], ["论文二 · 表 1–表 4", "Paper 2 · Tables 1–4"], ["Part 3 · Paper 2 · 全场最有信息量的一页", "PART 3 · PAPER 2 · THE MOST INFORMATIVE SLIDE OF THE DECK"], ["把措施拆开：", "Split the measures apart:"], ["谁打内资、谁打外资，分得很清楚", "WHO HITS DOMESTIC FIRMS AND WHO HITS FOREIGN FIRMS"], ["措施类型", "Measure type"], ["对外资企业", "Foreign-invested firms"], ["对内资企业", "Domestic firms"], ["直接壁垒", "Direct barriers"], ["关税、配额、数量限制", "tariffs, quotas, quantitative limits"], ["不显著", "not significant"], ["显著为负 打的是出口方", "significant and negative; it hits the exporter"], ["政府补贴", "Government subsidies"], ["对本国企业补贴", "subsidies to domestic firms"], ["显著为负", "significant and negative"], ["本地化购买", "Buy-local purchasing"], ["buy-local、国产化率", "buy-local rules, domestic content requirements"], ["这套分工非常符合直觉：", "The division of labor is intuitive:"], ["直接壁垒打的是「往你这里卖货的人」；补贴与本地化购买打的是「已经在你境内经营的外资」—— 后者失去原有优惠与准入条件，风险与不确定性上升。", "direct barriers hit those selling into your market, whereas subsidies and buy-local rules hit foreign firms already operating inside it, which lose their previous concessions and market access, raising risk and uncertainty."], ["和教材接上了：", "And it connects back to the textbook:"], ["教材 p.179–180 讲的印尼要求现代零售店", "the Indonesian rule on pp.179–180 requiring modern retailers to sell"], ["卖本国产品，就是「本地化购买」的同类措施； 教材 p.169 那个「用补贴代替限进口」的框，就是「政府补贴」。", "80 percent domestic products is the same class of measure as buy-local purchasing, and the box on p.169 about substituting subsidies for import limits is exactly the government-subsidy category."], ["论文二 · 表 5（9)–(14) 列 × 教材 pp.169、179–180", "Paper 2 · Table 5, columns (9)–(14) × textbook pp.169, 179–180"], ["渠道：政策 →", "Channels: policy →"], ["更贵的中间品", "COSTLIER INTERMEDIATES"], ["更弱的技术溢出", "WEAKER SPILLOVERS"], ["更低的参与度", "LOWER PARTICIPATION"], ["贸易限制性政策", "Trade-restrictive policy"], ["中间品贸易成本", "Intermediate-input trade costs"], ["技术溢出（TFP）", "Technology spillovers (TFP)"], ["GVC 参与度", "GVC participation"], ["网络韧性 ↓", "Network resilience ↓"], ["结论", "outcome"], ["成本渠道：", "Cost channel:"], ["关税、合规、本地化采购、库存与生产调整——都推高中间品采购成本，供应链的灵活性被吃掉。", "tariffs, compliance, local procurement and inventory adjustment all raise the cost of intermediate inputs and eat into the flexibility of the supply chain."], ["技术渠道：", "Technology channel:"], ["外资准入门槛抬高、投资减少、技术信息交流变慢——溢出的范围与强度一起缩。", "higher entry barriers for foreign investors, less investment and slower technical exchange shrink both the reach and the strength of spillovers."], ["参与度渠道：", "Participation channel:"], ["进口端中间品流动受阻、出口端市场受限，参与度下滑又反过来降低效率。", "intermediate flows are blocked on the import side and markets are restricted on the export side, and falling participation feeds back into lower efficiency."], ["技术溢出那一条把政策强度取了对数并滞后一期，理由是影响有滞后。", "The spillover equation uses the log of policy intensity lagged one period, on the grounds that the effect is delayed."], ["论文二 · 表 6 · 机制检验", "Paper 2 · Table 6 · Mechanism tests"], ["再拆一层：", "One further cut:"], ["跨境次数越多，越扛不住", "THE MORE BORDERS CROSSED, THE LESS RESILIENT"], ["参与 GVC 活动 · 外资", "GVC activity · foreign"], ["参与 GVC 活动 · 内资", "GVC activity · domestic"], ["复杂价值链 · 内资", "Complex value chain · domestic"], ["复杂价值链 · 外资", "Complex value chain · foreign"], ["简单价值链 · 外资", "Simple value chain · foreign"], ["简单价值链 · 内资", "Simple value chain · domestic"], ["读法：", "How to read it:"], ["复杂价值链（多次跨境）上，内外资都被显著打击；简单价值链（只跨一次境）上，只有外资被打。", "in complex value chains, where goods cross borders several times, both domestic and foreign firms are hit significantly; in simple chains, where they cross once, only foreign firms are."], ["结论一句话：跨境次数越多，暴露在政策风险下的面就越大——而中国的内资企业，在简单链上有本土链条顶着。", "In one sentence: more border crossings mean more exposure to policy risk, and Chinese domestic firms in simple chains are protected by local supply chains."], ["论文二 · 表 7 · 进一步分析", "Paper 2 · Table 7 · Further analysis"], ["两篇放在一起：看起来相反，其实是", "Side by side they look opposite, but they are"], ["同一件事的两面", "TWO SIDES OF ONE STORY"], ["维度", "Dimension"], ["论文一（337）", "Paper 1 (Section 337)"], ["论文二（GTA 措施）", "Paper 2 (GTA measures)"], ["冲击口径", "Shock measured"], ["一种具体壁垒（IP 执行） × 一个出口国", "one specific barrier (IP enforcement) × one exporting country"], ["一整篮子措施（50 类） × 所有国家", "a whole basket of measures (50 types) × all countries"], ["被解释变量", "Outcome"], ["对非美市场出口的双边际（EM / IM）", "both export margins to non-U.S. markets (EM / IM)"], ["PageRank 网络位置的变化率（韧性）", "rate of change of PageRank network position (resilience)"], ["分析单位", "Unit of analysis"], ["目的地国 × HS2 行业 × 年", "destination × HS2 industry × year"], ["国家 × 行业 × 内外资 × 年", "country × industry × ownership × year"], ["识别策略", "Identification"], ["强度 DID（Post × Exposure）+ 双边际分解", "intensity DID (Post × Exposure) with margin decomposition"], ["三重固定效应面板 + IV（2SLS）+ PSM", "three-way FE panel + IV (2SLS) + PSM"], ["核心结论", "Core finding"], ["壁垒", "barriers"], ["促成了转移", "induced reallocation"], ["：品种更宽、份额更高", ": wider coverage, higher shares"], ["削弱了韧性", "weakened resilience"], ["：外资更脆，复杂链更脆", ": foreign firms and complex chains are more fragile"], ["谁是受害者", "Who bears the cost"], ["不是「出口消失」，而是", "not lost exports, but"], ["市场结构被迫重组", "a forced restructuring of market structure"], ["是", "the"], ["国家在网络中的位置", "country's position in the network"], ["与外资的生存条件", "and the survival conditions of foreign-invested firms"], ["转移是企业的", "Reallocation is the firm's"], ["自救", "self-rescue"], ["，韧性下降是国家的", "; falling resilience is the country's"], ["代价", "cost"], ["——两篇文章各拍了一张照片，拼起来才是全景。", ". Each paper takes one photograph; only together do they form the panorama."], ["PART 4 · 对照", "PART 4 · COMPARISON"], ["Part 4 · 全场的高潮", "PART 4 · THE CLIMAX"], ["把两篇钉回教材：", "Pin both papers back to the textbook:"], ["五条「低估理由」被逐条实证", "THE FIVE UNDERSTATEMENT ARGUMENTS, TESTED ONE BY ONE"], ["教材 p.183 说：真实成本可能明显更高，但很难说高多少。这两篇文章填上了一个答案。", "On p.183 the textbook says the true cost may be noticeably larger but it is hard to say by how much. These two papers supply part of the answer."], ["教材的五条低估理由", "The textbook's five arguments for understatement"], ["两篇论文里对应的证据", "Corresponding evidence in the two papers"], ["判定", "Verdict"], ["① 外国报复", "1. Foreign retaliation"], ["论文一：壁垒使出口转向第三国，第三国市场被挤压——教材未写的「转移成本」", "Paper 1: barriers push exports into third countries and squeeze those markets, a reallocation cost the textbook never writes down"], ["被具体化为第三方市场再配置", "Made concrete as third-market reallocation"], ["② 执法成本", "2. Enforcement costs"], ["论文一：337 的律师费、合规调整、客户采购风险评估", "Paper 1: Section 337 legal fees, compliance adjustment and customer procurement risk"], ["部分实证（成本渠道）", "Partly tested (cost channel)"], ["③ 寻租成本", "3. Rent seeking"], ["两篇都未直接测（论文二用政策频次，不测游说）", "Neither paper measures it directly; Paper 2 counts measures, not lobbying"], ["仍是空白", "still a gap"], ["④ 租金流向外国", "4. Rents to foreign exporters"], ["两篇都未直接测（VER 类案例不在样本内）", "Neither paper measures it; VER-type cases lie outside both samples"], ["⑤ 创新与品种减少", "5. Lost innovation and product variety"], ["论文二：TFP 下降 −0.0384、GVC 参与度下降 −0.0105，且损失沿网络放大", "Paper 2: TFP falls by 0.0384 and GVC participation by 0.0105, and the loss is amplified along the network"], ["核心实证", "Core evidence"], ["所以我们这场 pre 的结论：", "So the conclusion of this presentation:"], ["教材算的那块三角形没有算错，它只是", "the triangle is not wrong, it simply"], ["只算了本国市场里的一小块", "counts one small block inside the domestic market"], ["。 真实的代价会沿着价值链传导、在复杂链条上被放大、并且以「网络位置下滑」的形式留在账上。", ". The real cost travels along value chains, is amplified in complex chains, and stays on the books as a decline in network position."], ["三角形是下限，不是答案。", "The triangle is a lower bound, not the answer."], ["教材 pp.182–184 × 论文一 §5.5、论文二 表 1、表 6", "Textbook pp.182–184 × Paper 1 §5.5, Paper 2 Tables 1 and 6"], ["批判性评价：", "Critical appraisal:"], ["两篇各自的软肋", "WHERE EACH PAPER IS FRAGILE"], ["处理定义", "Treatment definition"], ["同一行业后续案件被并入「已处理」，但每次新立案其实是新冲击", "later cases in the same industry are folded into an existing treatment, yet each new filing is a new shock"], ["暴露度基数", "Exposure base"], ["用首案前一年对美出口，若企业已按预期提前转移，基数就被污染", "exports to the U.S. in the year before the first case: if firms had already shifted in anticipation, the base is contaminated"], ["分析层级", "Level of analysis"], ["只有行业层面，分不清「新企业进入」与「存量企业扩产」", "industry level only, so entry by new firms cannot be separated from expansion by incumbents"], ["机制检验", "Mechanism tests"], ["把中间结果当因变量，非正式中介分解——作者自称只说「与渠道一致」", "intermediate outcomes regressed as dependent variables, not a formal mediation analysis; the authors themselves claim only consistency"], ["分母问题", "Denominator"], ["EM/IM 的分母是「该国从世界进口」，含中国自身份额；未做质量调整", "EM and IM are scaled by the destination's imports from the world, which include China's own share, and no quality adjustment is made"], ["指标构造", "Index construction"], ["核心变量是「频次」，一项关税与一项技术标准被等权相加，经济当量不同", "the core variable is a count, so a tariff and a technical standard carry equal weight although their economic content differs"], ["韧性维度", "Resilience dimension"], ["只取抵抗力，放弃恢复力/发展力——「当年掉下去」≠「起不来」", "resistance only, with recovery and development dropped: falling in a given year is not the same as failing to recover"], ["样本窗口", "Sample window"], ["2009–2016，正好错过 2018–2019 中美贸易战这一最大冲击", "2009–2016, which misses the 2018–2019 U.S.–China trade war, the largest shock of the period"], ["基期选择", "Base period"], ["以 2005–2007 为稳定基准，结果对基期敏感", "2005–2007 is taken as the stable benchmark, and the results are sensitive to that choice"], ["工具变量", "Instruments"], ["「措施种类数」与「产出价格指数」的排他性约束可议", "the exclusion restriction for the number of measure types and the output price index is debatable"], ["一句话总评：", "One-line verdict:"], ["两篇都做了扎实的稳健性，但都属于「识别出一个稳健的相关性」，而不是「算出了一个可信的福利数值」。 所以正确的读法是：", "both papers are rigorous on robustness, but both identify a robust correlation rather than estimate a credible welfare number. The right reading is:"], ["它们证明「代价被低估」，而不是「代价等于某个具体数字」。", "they show that the cost is understated, not what the cost equals."], ["PART 4 · 批判", "PART 4 · CRITIQUE"], ["政策启示：", "Policy implications:"], ["三层", "THREE LEVELS"], ["，都从论文里长出来", ", EACH GROUNDED IN THE PAPERS"], ["LEVEL 01 · 国家", "LEVEL 01 · COUNTRY"], ["不要把以邻为壑当安全", "Beggar-thy-neighbor is not security"], ["论文二：损失会沿网络放大回来。主张回到 WTO 多边框架、减少过度保护主义干预，避免技术与市场双重封闭。", "Paper 2: losses are amplified back along the network. It argues for a return to the WTO multilateral framework, less over-intervention, and against closing both technology and markets."], ["LEVEL 02 · 行业", "LEVEL 02 · INDUSTRY"], ["多元化 + 关键中间品", "Diversify and secure critical inputs"], ["推进产业链多元化布局，提升关键中间品供应稳定性；加大制造业与高技术产业的技术创新支持，提高附加值。", "diversify supply chains, stabilize the supply of critical intermediate inputs, and support innovation in manufacturing and high-technology sectors to raise value added."], ["LEVEL 03 · 企业", "LEVEL 03 · FIRM"], ["按产品属性分工应对", "Match the response to the product"], ["高技术、专利密集：先做 FTO 检索、协调海外专利组合、完成目的地认证再扩品种。", "high-technology, patent-intensive exporters: run freedom-to-operate searches, coordinate overseas patent portfolios and complete destination certification before widening coverage."], ["非高技术：先守住客户与分销渠道，靠份额扩张。", "non-high-technology exporters: hold customers and distribution channels, and expand through share."], ["论文一还提了一个很具体的制度建议：", "Paper 1 also makes a concrete institutional proposal:"], ["建立产品层面的知识产权执法风险预警系统——把 337 立案信息、HS6 暴露度、 专利归属、程序节点与排除令风险放在一起监控，对高暴露行业提供及时的法律指引与目的地市场准入信息。", "build a product-level early-warning system for IP enforcement risk that monitors Section 337 filings together with HS6 exposure, patent ownership, procedural milestones and exclusion-order risk, and gives highly exposed industries timely legal guidance and destination market-access information."], ["论文一 §6 · 论文二 结论与启示", "Paper 1, §6 · Paper 2, conclusions and implications"], ["教材教我们把非关税壁垒算成", "The textbook teaches us to measure NTBs as"], ["一块三角形", "a triangle"], ["这两篇论文告诉我们，真实的代价", "These two papers show the real cost is"], ["不在三角形里，而在一张网的形状里。", "not in the triangle, but in the shape of a network."], ["三角形的结论是：配额未必比关税更糟，损失可能只有 0.2% 的 GDP。", "The triangle says a quota need not be worse than a tariff and the loss may be only 0.2 percent of GDP."], ["网络视角的结论是：损失会转移、会传导、会在复杂链条上放大，并以外资撤离与位置下滑的形式留下来。", "The network view says the loss travels, propagates, is amplified in complex chains, and remains on the books as foreign exit and falling position."], ["PART 4 END · 欢迎提问", "END OF PART 4 · QUESTIONS WELCOME"], ["← → 翻页 · F 全屏", "← → to navigate · F for full screen"]]);
+  var LOOSE = new Map();
+  TR.forEach(function(v,k){ LOOSE.set(k.replace(/\s/g,''), v); });
+
+  var store = [];        // [node, key, leadWs, trailWs]
+  var walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null);
+  var n;
+  while((n = walker.nextNode())){
+    if(n.parentElement && n.parentElement.closest('.langbar')) continue;
+    var raw = n.nodeValue;
+    if(!raw || !raw.trim()) continue;
+    var key = raw.replace(/\s+/g,' ').trim();
+    var lead = (raw.match(/^\s*/)||[''])[0];
+    var trail = (raw.match(/\s*$/)||[''])[0];
+    store.push([n, key, lead, trail, raw]);
+  }
+
+  var titleZh = document.title;
+  var titleEn = TR.get(titleZh.replace(/\s+/g,' ').trim()) || titleZh;
+
+  function lookup(key){
+    if(TR.has(key)) return TR.get(key);
+    var loose = key.replace(/\s/g,'');
+    if(LOOSE.has(loose)) return LOOSE.get(loose);
+    return null;
+  }
+
+  var current = 'zh';
+  function setLang(lang){
+    if(lang === current) return;
+    store.forEach(function(rec){
+      var node = rec[0], key = rec[1], lead = rec[2], trail = rec[3], raw = rec[4];
+      if(lang === 'en'){
+        var en = lookup(key);
+        if(en !== null) node.nodeValue = lead + en + trail;
+      } else {
+        node.nodeValue = raw;
+      }
+    });
+    document.title = (lang === 'en') ? titleEn : titleZh;
+    document.documentElement.lang = (lang === 'en') ? 'en' : 'zh-CN';
+    [].forEach.call(document.querySelectorAll('.langbtn'), function(b){
+      b.classList.toggle('active', b.dataset.lang === lang);
+    });
+    current = lang;
+    // 语言切换后重算画布缩放
+    window.dispatchEvent(new Event('resize'));
+  }
+
+  [].forEach.call(document.querySelectorAll('.langbtn'), function(b){
+    b.addEventListener('click', function(e){ e.stopPropagation(); setLang(b.dataset.lang); });
+  });
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'l' || e.key === 'L'){ setLang(current === 'zh' ? 'en' : 'zh'); }
+  });
+  window.__setLang = setLang;
+  setLang('en');   // 课程要求幻灯片以英文呈现；右上角可切回中文
+})();
+</script>
+<!-- I18N-JS-END -->
+
+</body>
+</html>
